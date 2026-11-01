@@ -12,7 +12,7 @@ index.html            페이지 본문
 assets/css/style.css  디자인
 assets/js/data.js     공개 데이터(인물 162명, 길드, 소속)
 assets/js/profiles.js 인물 상세 프로필(공개 항목)
-assets/js/nai.js      인물별 NAI 이미지 태그(전신·프로필 프레임 포함)
+assets/js/nai.js      인물별 NAI 캐릭터 태그
 assets/js/sealed.js   봉인 문서와 인물별 봉인 기록(스포일러)을 인코딩한 꾸러미
 assets/js/app.js      동작 스크립트(필터, 모달, 지도, 랭킹, 봉인 해제)
 img/                  인물 이미지 (cXXX_h 얼굴 / cXXX_f 전신 / cXXXr 플레이어의 현실 모습 / cXXXa 아바타·신의 형상)
