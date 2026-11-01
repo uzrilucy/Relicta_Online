@@ -12,9 +12,10 @@ index.html            페이지 본문
 assets/css/style.css  디자인
 assets/js/data.js     공개 데이터(인물 162명, 길드, 소속)
 assets/js/profiles.js 인물 상세 프로필(공개 항목)
+assets/js/nai.js      인물별 NAI 이미지 태그(전신·프로필 프레임 포함)
 assets/js/sealed.js   봉인 문서와 인물별 봉인 기록(스포일러)을 인코딩한 꾸러미
 assets/js/app.js      동작 스크립트(필터, 모달, 지도, 랭킹, 봉인 해제)
-img/                  인물 이미지 (cXXX_h 얼굴 / cXXX_f 전신 / cXXXa 변신 모습)
+img/                  인물 이미지 (cXXX_h 얼굴 / cXXX_f 전신 / cXXXr 플레이어의 현실 모습 / cXXXa 아바타·신의 형상)
 emblem/               길드 엠블럼 12종 (SVG)
 promo/                로고, 커버, 스틸컷, PV 영상
 div/                  섹션 구분선 (SVG)
@@ -27,7 +28,7 @@ div/                  섹션 구분선 (SVG)
    - 무료 계정에서는 저장소를 **Public**으로 만들어야 Pages가 켜집니다.
 2. 이 폴더의 내용을 저장소 맨 위에 올립니다.
    - `index.html`이 저장소 최상단에 있어야 합니다.
-   - 파일이 370개가 넘습니다. 웹 업로드는 한 번에 100개까지만 됩니다.
+   - 파일이 560개가 넘습니다. 웹 업로드는 한 번에 100개까지만 됩니다.
    - **GitHub Desktop**으로 올리면 한 번에 끝납니다.
      - 저장소를 Clone합니다.
      - 이 폴더 내용을 Clone한 폴더에 붙여 넣습니다.

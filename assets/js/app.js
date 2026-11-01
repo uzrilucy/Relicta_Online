@@ -144,7 +144,7 @@ function profHTML(c){const P=PROFS()[c.id];const toc=[];let out='';
   let look=g('외형'),rlook=null;if(look&&look.includes(' · 현실 외모: '))[look,rlook]=look.split(' · 현실 외모: ');
   if(g('게임')||g('현실 정체')){
    const on=g('게임')?`<section class="ps on"><h4>게임 속<small>ONLINE</small></h4>${body(g('게임'))}</section>`:'';
-   const off=g('현실 정체')?`<section class="ps off"><h4>현실<small>OFFLINE</small></h4>${body(g('현실 정체')+(rlook?' · 현실 외모: '+rlook:''))}</section>`:'';
+   const off=g('현실 정체')?`<section class="ps off"><h4>현실<small>OFFLINE</small></h4>${isPlayer(c)?`<button type="button" class="rview" data-form="1"><img src="${head(c.id+'r')}" alt="" loading="lazy"><span>현실 모습 보기</span></button>`:''}${body(g('현실 정체')+(rlook?' · 현실 외모: '+rlook:''))}</section>`:'';
    out+=`<div class="duo" id="ps-duo">${on}${off}</div>`;toc.push(['duo','게임 · 현실'])}
   [['능력','능력','ABILITY'],['권능','권능','AUTHORITY'],['권능 / 힘','권능','AUTHORITY'],['힘','힘','POWER'],['현실에서의 힘','현실에서의 힘','POWER']].forEach(([l,t,e])=>{if(g(l))sec('pw',t,e,body(g(l)),c.c==='real'?'off':'')});
   ['솜니움을 보는 눈','렐릭타를 보는 눈','이야기를 보는 눈'].forEach(l=>{if(g(l))sec('gz',l,'GAZE',body(g(l)))});
@@ -158,20 +158,37 @@ function profHTML(c){const P=PROFS()[c.id];const toc=[];let out='';
   if(g('로그아웃 뒤'))sec('lo','로그아웃 뒤','AFTER LOGOUT',body(g('로그아웃 뒤')));
   if(g('샘플 대사'))sec('ln','대사','LINES',lines(g('샘플 대사')));
  }
+ const nh=naiHTML(c);if(nh){out+=nh;toc.push(['nai','NAI 태그'])}
  const S=secOf(c.id);
  if(S.length){const sm={};S.forEach(([l,t])=>{sm[l]=t});
   const rows=VAULT.filter(([l])=>sm[l]).map(([l,t,e])=>`<details class="sx"><summary>${LOCK}<span class="t">${t}</span><span class="k">${e}</span><span class="op"></span></summary><div class="sxb">${l==='관계'?rels(sm[l]):body(sm[l])}</div></details>`).join('');
   out+=`<section class="vault" id="ps-vt"><header><div><span class="eyebrow">Classified</span><h4>봉인 기록</h4><p>이 인물의 숨은 동기와 반전이 들어 있습니다. 직접 열어 보세요.</p></div><button type="button" class="sxall">모두 열기</button></header>${rows}</section>`;
   toc.push(['vt','봉인 기록'])}
  return {out,toc}}
+const NAIX=()=>(typeof NAI==='object'&&NAI)||{tags:{}};
+function naiHTML(c){const N=NAIX(),T=N.tags[c.id];if(!T)return '';
+ const tabs=T.length>1?`<div class="ntabs" role="tablist">${T.map(([l],i)=>`<button type="button" role="tab" data-l="${l}" aria-selected="${i===0}">${l}</button>`).join('')}</div>`:'';
+ const row=(b,s,t)=>`<div class="pr"><div class="pl"><b>${b}</b>${s?`<small>${s}</small>`:''}</div><pre>${esc(t)}</pre><button type="button" class="cp">복사</button></div>`;
+ const panes=T.map(([l,t],i)=>`<div class="npane" role="tabpanel"${i?' hidden':''}>${row('캐릭터 태그','',t)}${row('전신샷','832×1216',t+', '+N.full)}${row('프로필샷','1024×1024',t+', '+N.prof)}</div>`).join('');
+ return `<section class="ps nai" id="ps-nai"><h4>NAI 태그<small>PROMPT</small></h4><p class="nnote">NovelAI 이미지 생성용 태그예요. 전신샷과 프로필샷은 촬영 프레임이 붙은 완성본입니다.</p>${tabs}${panes}</section>`}
+function naiTab(i){const t=$$('#mProf .nai [role=tab]'),p=$$('#mProf .nai .npane');t.forEach((x,j)=>x.setAttribute('aria-selected',j===i));p.forEach((x,j)=>x.hidden=j!==i)}
+function copyText(btn){const pre=btn.parentElement.querySelector('pre'),txt=pre.textContent;
+ const ok=()=>{btn.textContent='복사됨';btn.classList.add('done');setTimeout(()=>{btn.textContent='복사';btn.classList.remove('done')},1400)};
+ const fb=()=>{const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='선택됨'};
+ try{navigator.clipboard.writeText(txt).then(ok,fb)}catch(e){fb()}}
 let ml=[],mi=0,lastFocus=null,hist=[];
 function openM(arr,i){ml=arr;mi=i;hist=[];lastFocus=document.activeElement;fillM();$('#modal').classList.add('open');$('#mClose').focus()}
-function fillImg(alt){const c=ml[mi];const id=alt?c.alt:c.id;
- $('#mImg').src=full(id);$('#mImg').alt=`${c.n} 전신 일러스트`;
- $('#mAlt').innerHTML=c.alt?`<button type="button" aria-pressed="${!alt}" data-a="0">${c.c==='hidden'?'인간의 모습':'현실'}</button><button type="button" aria-pressed="${!!alt}" data-a="1">${c.n==='에테르딘'?'신의 형상':'아바타'}</button>`:'';
- $$('#mAlt button').forEach(b=>b.addEventListener('click',()=>fillImg(b.dataset.a==='1')))}
-function fillM(){const c=ml[mi],g=GN[c.g];fillImg(false);
- $('#mCap').textContent=`CHARACTER FILE · No.${c.id.replace(/\D/g,'')}`;
+const isPlayer=c=>['plat','mid','solo'].includes(c.c);
+function imgForms(c){if(isPlayer(c))return [[c.id,'게임 속'],[c.id+'r','현실']];
+ if(c.alt)return c.n==='에테르딘'?[[c.id,'인간의 모습'],[c.alt,'신의 형상']]:[[c.id,'현실'],[c.alt,'아바타']];return [[c.id,'']]}
+let curForm=0;
+function fillImg(k){const c=ml[mi],F=imgForms(c);curForm=k=Math.min(k||0,F.length-1);const [id,lab]=F[k];
+ $('#mImg').src=full(id);$('#mImg').alt=`${c.n} 전신 일러스트${lab?' ('+lab+')':''}`;
+ $('#mAlt').innerHTML=F.length>1?F.map(([,l],i)=>`<button type="button" aria-pressed="${i===k}" data-a="${i}">${l}</button>`).join(''):'';
+ $$('#mAlt button').forEach(b=>b.addEventListener('click',()=>fillImg(+b.dataset.a)));
+ $('#mCap').textContent=`CHARACTER FILE · No.${c.id.replace(/\D/g,'')}${lab?' · '+lab:''}`;
+ const t=$$('#mProf .nai [role=tab]');const j=t.findIndex(x=>x.dataset.l===lab);if(j>=0)naiTab(j)}
+function fillM(){const c=ml[mi],g=GN[c.g];
  $('#mFac').innerHTML=`${g.em?`<img src="${emb(g.em)}" alt="">`:''}<span>${esc(g.name)}</span>`;
  $('#mName').textContent=c.n;$('#mBh').textContent=c.b?`「${c.b}」`:'';$('#mRl').textContent=c.r;
  const sp=specHTML(c);$('#mSpec').innerHTML=sp;$('#mSpec').hidden=!sp;
@@ -184,10 +201,13 @@ function fillM(){const c=ml[mi],g=GN[c.g];fillImg(false);
  $('#mToc').innerHTML=toc.map(([k,t])=>`<button type="button" data-k="${k}"${k==='vt'?' class="lock"':''}>${t}</button>`).join('');$('#mToc').hidden=!toc.length;
  const bk=hist.length?hist[hist.length-1]:null;$('#mBack').hidden=!bk;if(bk)$('#mBack').textContent=`← ${bk[0][bk[1]].n}에게 돌아가기`;
  $('#mPrev').disabled=ml.length<2;$('#mNext').disabled=ml.length<2;
- $('#mInfo').scrollTop=0;$('.mbox').scrollTop=0}
+ fillImg(0);$('#mInfo').scrollTop=0;$('.mbox').scrollTop=0}
 function go(id){const c=byId[id];if(!c||c===ml[mi])return;hist.push([ml,mi]);ml=C.filter(x=>x.g===c.g);mi=ml.indexOf(c);if(mi<0){ml=[c];mi=0}fillM()}
 $('#mBack').addEventListener('click',()=>{const h=hist.pop();if(h){[ml,mi]=h;fillM()}});
 $('#mProf').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){go(b.dataset.go);return}
+ const cp=e.target.closest('.cp');if(cp){copyText(cp);return}
+ const tb=e.target.closest('.nai [role=tab]');if(tb){naiTab($$('#mProf .nai [role=tab]').indexOf(tb));return}
+ const rv=e.target.closest('.rview');if(rv){fillImg(+rv.dataset.form);if(innerWidth<=760)$('.mbox').scrollTo({top:0,behavior:'smooth'});return}
  if(e.target.closest('.sxall')){const all=$$('#mProf .sx');const open=all.some(d=>!d.open);all.forEach(d=>d.open=open);e.target.closest('.sxall').textContent=open?'모두 닫기':'모두 열기'}});
 $('#mToc').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const el=$('#ps-'+b.dataset.k);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
 function closeM(){$('#modal').classList.remove('open');hist=[];lastFocus&&lastFocus.focus()}
@@ -226,7 +246,7 @@ const secs=$$('main section[id]');const io=new IntersectionObserver(es=>{es.forE
 let HID=[];
 function loadSealed(){if(HID.length)return;const s=PJ(window.RELICTA_SEALED);
  s.chars.forEach(c=>{if(!byId[c.id]){C.push(c);byId[c.id]=c;byName[c.n]=c}});
- const P=PROFS();Object.entries(s.prof||{}).forEach(([id,o])=>{P[id]=o.p;HSEC[id]=o.s});
+ const P=PROFS();Object.entries(s.prof||{}).forEach(([id,o])=>{P[id]=o.p;HSEC[id]=o.s});Object.assign(NAIX().tags,s.nai||{});
  HID=s.hid;HID.forEach(h=>{const c=byId[h.id];c.t=h.p;c.r=h.sf});
  $('#secret').innerHTML=s.html}
 function fillHidden(){$('#hidden').innerHTML=HID.map((h,i)=>{const c=byId[h.id];return `<article class="hc" tabindex="0" role="button" data-i="${i}"><img src="${head(c.id)}" alt="" loading="lazy"><div><b>${esc(c.n)}</b><div class="sf">${esc(h.sf)}</div><p>${esc(h.p)}</p></div></article>`}).join('');
