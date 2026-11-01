@@ -169,8 +169,8 @@ const NAIX=()=>(typeof NAI==='object'&&NAI)||{tags:{}};
 function naiHTML(c){const N=NAIX(),T=N.tags[c.id];if(!T)return '';
  const tabs=T.length>1?`<div class="ntabs" role="tablist">${T.map(([l],i)=>`<button type="button" role="tab" data-l="${l}" aria-selected="${i===0}">${l}</button>`).join('')}</div>`:'';
  const row=(b,s,t)=>`<div class="pr"><div class="pl"><b>${b}</b>${s?`<small>${s}</small>`:''}</div><pre>${esc(t)}</pre><button type="button" class="cp">복사</button></div>`;
- const panes=T.map(([l,t],i)=>`<div class="npane" role="tabpanel"${i?' hidden':''}>${row('캐릭터 태그','',t)}${row('전신샷','832×1216',t+', '+N.full)}${row('프로필샷','1024×1024',t+', '+N.prof)}</div>`).join('');
- return `<section class="ps nai" id="ps-nai"><h4>NAI 태그<small>PROMPT</small></h4><p class="nnote">NovelAI 이미지 생성용 태그예요. 전신샷과 프로필샷은 촬영 프레임이 붙은 완성본입니다.</p>${tabs}${panes}</section>`}
+ const panes=T.map(([l,t],i)=>`<div class="npane" role="tabpanel"${i?' hidden':''}>${row('캐릭터 태그','',t)}</div>`).join('');
+ return `<section class="ps nai" id="ps-nai"><h4>NAI 태그<small>PROMPT</small></h4><p class="nnote">NovelAI 이미지 생성용 캐릭터 태그예요.</p>${tabs}${panes}</section>`}
 function naiTab(i){const t=$$('#mProf .nai [role=tab]'),p=$$('#mProf .nai .npane');t.forEach((x,j)=>x.setAttribute('aria-selected',j===i));p.forEach((x,j)=>x.hidden=j!==i)}
 function copyText(btn){const pre=btn.parentElement.querySelector('pre'),txt=pre.textContent;
  const ok=()=>{btn.textContent='복사됨';btn.classList.add('done');setTimeout(()=>{btn.textContent='복사';btn.classList.remove('done')},1400)};
