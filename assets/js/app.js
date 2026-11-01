@@ -118,10 +118,13 @@ setFilter('all');
 
 /* 모달 · 인물 상세 파일 */
 const byName=Object.fromEntries(C.map(c=>[c.n,c]));
+// 본문에서 쓰는 전체 이름·별칭도 같은 인물로 연결한다.
+const NAME_ALIASES={'메이블 헤이즈':'c123','바솔로뮤 브루어':'c125','바트':'c125'};
+Object.entries(NAME_ALIASES).forEach(([name,id])=>{if(byId[id])byName[name]=byId[id]});
 const HSEC={};
 const PJ=s=>{const k='RELICTA',b=atob(s||''),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i)^k.charCodeAt(i%k.length);return JSON.parse(new TextDecoder('utf-8').decode(u))};
 let SECR=null;
-const secOf=id=>{if(!SECR){try{SECR=PJ(window.RELICTA_SECRETS)}catch(e){SECR={}}}return SECR[id]||HSEC[id]||[]};
+const secOf=id=>{if(SECR===null&&window.RELICTA_SECRETS){try{const records=PJ(window.RELICTA_SECRETS);if(records&&typeof records==='object'&&!Array.isArray(records))SECR=records}catch(e){}}return (SECR&&SECR[id])||HSEC[id]||[]};
 const PROFS=()=>(typeof PROF==='object'&&PROF)||{};
 const PART={'가':'이','를':'을','는':'은','와':'과','와의':'과의','와는':'과는','로':'으로'};
 const rich=t=>esc(t)
@@ -179,12 +182,23 @@ function profHTML(c){const P=PROFS()[c.id];const toc=[];let out='';
   if(g('샘플 대사'))sec('ln','대사','LINES',lines(g('샘플 대사')));
  }
  const nh=naiHTML(c);if(nh){out+=nh;toc.push(['nai','NAI 태그'])}
- const S=secOf(c.id);
- if(S.length){const sm={};S.forEach(([l,t])=>{sm[l]=t});
-  const rows=VAULT.filter(([l])=>sm[l]).map(([l,t,e])=>`<details class="sx"><summary>${LOCK}<span class="t">${t}</span><span class="k">${e}</span><span class="op"></span></summary><div class="sxb">${l==='관계'?rels(sm[l]):body(sm[l])}</div></details>`).join('');
-  out+=`<section class="vault" id="ps-vt"><header><div><span class="eyebrow">Classified</span><h4>봉인 기록</h4><p>이 인물의 숨은 동기와 반전이 들어 있습니다. 직접 열어 보세요.</p></div><button type="button" class="sxall">모두 열기</button></header>${rows}</section>`;
-  toc.push(['vt','봉인 기록'])}
+ const vault=vaultHTML(c);if(vault){out+=vault;toc.push(['vt','봉인 기록'])}
  return {out,toc}}
+function vaultHTML(c){const S=secOf(c.id);
+ if(!S.length){if(SECR!==null||HSEC[c.id])return '';
+  return `<section class="vault" id="ps-vt" aria-busy="true"><header><div><span class="eyebrow">Classified</span><h4>봉인 기록</h4></div></header><div class="sxb"><p class="vault-status" role="status">봉인 기록을 불러오는 중…</p><button type="button" class="cp secrets-retry" hidden>다시 불러오기</button></div></section>`}
+ const sm={};S.forEach(([l,t])=>{sm[l]=t});
+ const rows=VAULT.filter(([l])=>sm[l]).map(([l,t,e])=>`<details class="sx"><summary>${LOCK}<span class="t">${t}</span><span class="k">${e}</span><span class="op"></span></summary><div class="sxb">${l==='관계'?rels(sm[l]):body(sm[l])}</div></details>`).join('');
+ return `<section class="vault" id="ps-vt"><header><div><span class="eyebrow">Classified</span><h4>봉인 기록</h4><p>이 인물의 숨은 동기와 반전이 들어 있습니다. 직접 열어 보세요.</p></div><button type="button" class="sxall">모두 열기</button></header>${rows}</section>`}
+function loadProfileSecrets(c,token){if(SECR!==null||HSEC[c.id])return;
+ const vault=$('#ps-vt');if(!vault)return;
+ vault.setAttribute('aria-busy','true');vault.querySelector('.vault-status').textContent='봉인 기록을 불러오는 중…';vault.querySelector('.secrets-retry').hidden=true;
+ ensureSealed().then(()=>{if(token!==profileLoadToken||!$('#modal').classList.contains('open')||ml[mi].id!==c.id)return;
+  const current=$('#ps-vt');if(!current)return;const refocus=current.contains(document.activeElement);current.outerHTML=vaultHTML(c);
+  if(refocus)$('#ps-vt summary')?.focus()
+ }).catch(()=>{if(token!==profileLoadToken||!$('#modal').classList.contains('open')||ml[mi].id!==c.id)return;
+  const current=$('#ps-vt');if(!current)return;current.setAttribute('aria-busy','false');current.querySelector('.vault-status').textContent='봉인 기록을 불러오지 못했습니다. 연결을 확인하고 다시 시도해주세요.';current.querySelector('.secrets-retry').hidden=false})}
+
 const NAIX=()=>(typeof NAI==='object'&&NAI)||{tags:{}};
 function naiHTML(c){const N=NAIX(),T=N.tags[c.id];if(!T)return '';
  const tabs=T.length>1?`<div class="ntabs" role="tablist">${T.map(([l],i)=>`<button type="button" role="tab" data-l="${l}" aria-selected="${i===0}">${l}</button>`).join('')}</div>`:'';
@@ -196,7 +210,7 @@ function copyText(btn){const pre=btn.parentElement.querySelector('pre'),txt=pre.
  const ok=()=>{btn.textContent='복사됨';btn.classList.add('done');setTimeout(()=>{btn.textContent='복사';btn.classList.remove('done')},1400)};
  const fb=()=>{const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='선택됨'};
  try{navigator.clipboard.writeText(txt).then(ok,fb)}catch(e){fb()}}
-let ml=[],mi=0,lastFocus=null,hist=[];
+let ml=[],mi=0,lastFocus=null,hist=[],profileLoadToken=0;
 function openM(arr,i){ml=arr;mi=i;hist=[];lastFocus=document.activeElement;fillM();$('#modal').classList.add('open');document.body.classList.add('modal-active');document.dispatchEvent(new Event('relicta:modal'));$('#mClose').focus()}
 const isPlayer=c=>['plat','mid','solo'].includes(c.c);
 function imgForms(c){if(isPlayer(c))return [[c.id,'게임 속'],[c.id+'r','현실']];
@@ -221,16 +235,16 @@ function fillM(){const c=ml[mi],g=GN[c.g];
  $('#mToc').innerHTML=toc.map(([k,t])=>`<button type="button" data-k="${k}"${k==='vt'?' class="lock"':''}>${t}</button>`).join('');$('#mToc').hidden=!toc.length;
  const bk=hist.length?hist[hist.length-1]:null;$('#mBack').hidden=!bk;if(bk)$('#mBack').textContent=`← ${bk[0][bk[1]].n}에게 돌아가기`;
  $('#mPrev').disabled=ml.length<2;$('#mNext').disabled=ml.length<2;
- fillImg(0);$('#mInfo').scrollTop=0;$('.mbox').scrollTop=0}
+ fillImg(0);$('#mInfo').scrollTop=0;$('.mbox').scrollTop=0;loadProfileSecrets(c,++profileLoadToken)}
 function go(id){const c=byId[id];if(!c||c===ml[mi])return;hist.push([ml,mi]);ml=C.filter(x=>x.g===c.g);mi=ml.indexOf(c);if(mi<0){ml=[c];mi=0}fillM()}
 $('#mBack').addEventListener('click',()=>{const h=hist.pop();if(h){[ml,mi]=h;fillM()}});
-$('#mProf').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){go(b.dataset.go);return}
+$('#mProf').addEventListener('click',e=>{if(e.target.closest('.secrets-retry')){loadProfileSecrets(ml[mi],++profileLoadToken);return}const b=e.target.closest('[data-go]');if(b){go(b.dataset.go);return}
  const cp=e.target.closest('.cp');if(cp){copyText(cp);return}
  const tb=e.target.closest('.nai [role=tab]');if(tb){naiTab($$('#mProf .nai [role=tab]').indexOf(tb));return}
  const rv=e.target.closest('.rview');if(rv){fillImg(+rv.dataset.form);if(innerWidth<=760)$('.mbox').scrollTo({top:0,behavior:'smooth'});return}
  if(e.target.closest('.sxall')){const all=$$('#mProf .sx');const open=all.some(d=>!d.open);all.forEach(d=>d.open=open);e.target.closest('.sxall').textContent=open?'모두 닫기':'모두 열기'}});
 $('#mToc').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const el=$('#ps-'+b.dataset.k);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
-function closeM(){$('#modal').classList.remove('open');document.body.classList.remove('modal-active');document.dispatchEvent(new Event('relicta:modal'));hist=[];lastFocus&&lastFocus.focus()}
+function closeM(){profileLoadToken++;$('#modal').classList.remove('open');document.body.classList.remove('modal-active');document.dispatchEvent(new Event('relicta:modal'));hist=[];lastFocus&&lastFocus.focus()}
 $('#mClose').addEventListener('click',closeM);
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeM()});
 $('#mPrev').addEventListener('click',()=>{mi=(mi-1+ml.length)%ml.length;hist=[];fillM()});
@@ -264,11 +278,14 @@ const secs=$$('main section[id]');const io=new IntersectionObserver(es=>{es.forE
 
 /* ── 봉인 문서 ── */
 let sealedRequest=null;
-function ensureSealed(){if(window.RELICTA_SEALED)return Promise.resolve();if(sealedRequest)return sealedRequest;
- sealedRequest=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='assets/js/sealed.js?v=1.2.0';script.async=true;
-  script.onload=()=>window.RELICTA_SEALED?resolve():reject(new Error('Missing document'));
+function ensureSealed(){if(SECR!==null&&window.RELICTA_SEALED)return Promise.resolve();if(sealedRequest)return sealedRequest;
+ sealedRequest=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='assets/js/sealed.js?v=1.2.1';script.async=true;
+  script.onload=()=>{try{if(!window.RELICTA_SEALED||!window.RELICTA_SECRETS)throw new Error('Missing records');
+   const records=PJ(window.RELICTA_SECRETS);if(!records||typeof records!=='object'||Array.isArray(records))throw new Error('Invalid records');SECR=records;resolve()
+  }catch(error){script.remove();reject(error)}};
   script.onerror=()=>{script.remove();reject(new Error('Document unavailable'))};document.head.append(script)
  }).catch(error=>{sealedRequest=null;throw error});return sealedRequest}
+
 let HID=[];
 function loadSealed(){if(HID.length)return;const s=PJ(window.RELICTA_SEALED);
  s.chars.forEach(c=>{if(!byId[c.id]){C.push(c);byId[c.id]=c;byName[c.n]=c}});
