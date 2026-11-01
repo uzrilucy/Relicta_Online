@@ -4,14 +4,34 @@ const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const C=D.chars, byId=Object.fromEntries(C.map(c=>[c.id,c])), GN=Object.fromEntries(D.groups.map(g=>[g.id,g]));
 const head=id=>`img/${id}_h.webp`, full=id=>`img/${id}_f.webp`, emb=e=>`emblem/${e}.svg`;
 
-/* ── 별하늘 ── */
-(()=>{const cv=$('#stars'),x=cv.getContext('2d');let W,H,S=[];const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function rs(){W=cv.width=innerWidth*devicePixelRatio;H=cv.height=innerHeight*devicePixelRatio;S=Array.from({length:Math.round(W*H/9000)},()=>({x:Math.random()*W,y:Math.random()*H,r:(Math.random()*1.2+.3)*devicePixelRatio,p:Math.random()*6.3,s:.4+Math.random()*1.2,g:Math.random()<.12}))}
-function draw(t){x.clearRect(0,0,W,H);for(const s of S){const a=still?.6:.35+.65*Math.abs(Math.sin(s.p+t/1000*s.s*.6));x.globalAlpha=a;x.fillStyle=s.g?'#ebd6a4':'#e9e1ff';x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fill()}if(!still)requestAnimationFrame(draw)}
-addEventListener('resize',rs);rs();requestAnimationFrame(draw)})();
+/* ── 별하늘: 고해상도에서도 유휴 상태에는 다시 그리지 않음 ── */
+(()=>{const cv=$('#stars'),x=cv.getContext('2d');if(!x)return;let pending=0;
+ function draw(){pending=0;const dpr=Math.min(devicePixelRatio||1,1.5),w=innerWidth,h=innerHeight;
+  cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);x.setTransform(dpr,0,0,dpr,0,0);
+  const count=Math.min(180,Math.max(40,Math.round(w*h/9000)));
+  for(let i=0;i<count;i++){x.globalAlpha=.35+Math.random()*.55;x.fillStyle=Math.random()<.12?'#ebd6a4':'#e9e1ff';x.beginPath();x.arc(Math.random()*w,Math.random()*h,Math.random()*1.2+.3,0,7);x.fill()}}
+ function resize(){if(!pending)pending=requestAnimationFrame(draw)}
+ addEventListener('resize',resize,{passive:true});draw()})();
 
-/* ── 동시 접속 ── */
-(()=>{let n=1512804117;const el=$('#ccu');if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;setInterval(()=>{n+=Math.round((Math.random()-.45)*4800);el.textContent=n.toLocaleString('ko-KR')},1600)})();
+/* ── 동시 접속: 실제로 보이는 동안에만 숫자 갱신 ── */
+(()=>{let n=1512804117,timer=0,visible=false;const el=$('#ccu');if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ const stop=()=>{clearInterval(timer);timer=0};
+ const sync=()=>{if(!visible||document.hidden||document.body.classList.contains('modal-active')){stop();return}
+  if(!timer)timer=setInterval(()=>{n+=Math.round((Math.random()-.45)*4800);el.textContent=n.toLocaleString('ko-KR')},1600)};
+ new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;sync()}).observe(el);
+ document.addEventListener('visibilitychange',sync);document.addEventListener('relicta:modal',sync)})();
+
+/* ── 화면 밖의 SVG·장식 애니메이션 일시 정지 ── */
+const effectObserver=new IntersectionObserver(entries=>entries.forEach(e=>e.target.classList.toggle('fx-paused',!e.isIntersecting)));
+function watchEffects(root=document){root.querySelectorAll('.map-svg,.glitch').forEach(el=>{el.classList.add('fx-paused');effectObserver.observe(el)})}
+watchEffects();
+document.addEventListener('visibilitychange',()=>document.body.classList.toggle('page-idle',document.hidden));
+/* 재생한 PV도 화면 밖·백그라운드·상세창 뒤에서는 디코딩 중단 */
+(()=>{const video=$('.pv video');if(!video)return;
+ new IntersectionObserver(entries=>{if(!entries[0].isIntersecting&&document.fullscreenElement!==video&&!video.webkitDisplayingFullscreen)video.pause()}).observe(video);
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)video.pause()});
+ document.addEventListener('relicta:modal',()=>{if(document.body.classList.contains('modal-active'))video.pause()})})();
+
 
 /* ── 소식 ── */
 const NEWS=[
@@ -48,7 +68,7 @@ noctua:{k:'아우렐리아 · 지하',n:'녹투아 왕국',e:'Kingdom of Noctua'
 };
 function region(id){const r=R[id];$$('.hs').forEach(h=>h.classList.toggle('on',h.dataset.r===id));
  const g=r.g?D.groups.find(x=>x.id===r.g):null;
- $('#rinfo').innerHTML=`<span class="kind">${esc(r.k)}</span>${g?`<img class="em" src="${emb(g.em)}" alt="${esc(g.name)} 엠블럼">`:''}<h3>${esc(r.n)}</h3><span class="eng">${esc(r.e)}</span><p>${esc(r.p)}</p>${r.dl?`<dl>${r.dl.map(([a,b])=>`<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('')}</dl>`:''}${r.sys?`<div class="sys">${r.sys}</div>`:''}${(r.g||r.el)?`<a class="btn ghost" style="align-self:flex-start;margin-top:6px" href="#people" data-jump="${r.g||r.el}">이 지역의 인물 보기</a>`:''}${id==='abyss'?`<a class="btn ghost" style="align-self:flex-start;margin-top:6px" href="#abyss">나락 층별 정보</a>`:''}`;
+ $('#rinfo').innerHTML=`<span class="kind">${esc(r.k)}</span>${g?`<img class="em" src="${emb(g.em)}" alt="${esc(g.name)} 엠블럼" loading="lazy" decoding="async">`:''}<h3>${esc(r.n)}</h3><span class="eng">${esc(r.e)}</span><p>${esc(r.p)}</p>${r.dl?`<dl>${r.dl.map(([a,b])=>`<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('')}</dl>`:''}${r.sys?`<div class="sys">${r.sys}</div>`:''}${(r.g||r.el)?`<a class="btn ghost" style="align-self:flex-start;margin-top:6px" href="#people" data-jump="${r.g||r.el}">이 지역의 인물 보기</a>`:''}${id==='abyss'?`<a class="btn ghost" style="align-self:flex-start;margin-top:6px" href="#abyss">나락 층별 정보</a>`:''}`;
  const j=$('#rinfo [data-jump]');if(j)j.addEventListener('click',()=>{setFilter(GN[j.dataset.jump].c==='plat'||GN[j.dataset.jump].c==='mid'?'player':(GN[j.dataset.jump].c==='elys'?'elys':'all'),j.dataset.jump)})}
 $$('.hs').forEach(h=>{h.addEventListener('click',()=>region(h.dataset.r));h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();region(h.dataset.r)}})});
 region('zero');
@@ -70,7 +90,7 @@ brand:{e:'BRANDED',t:'bronze',reg:'아우렐리아 녹투아 지하',p:'붉은 �
 };
 const TIER={plat:'플래티넘',gold:'골드',silver:'실버',bronze:'브론즈'};
 function gcard(id){const g=GUILD[id],gg=GN[id],n=C.filter(c=>c.g===id).length;
- return `<article class="panel gc" tabindex="0" role="button" data-g="${id}" aria-label="${esc(gg.name)} 인물 보기"><img src="${emb(gg.em)}" alt=""><div><h4>${esc(gg.name)}</h4><span class="eng">${g.e}</span><div class="meta"><span class="t-${g.t}">${TIER[g.t]}</span><span>${esc(g.reg)}</span><span>수록 인물 ${n}명</span></div><p>${esc(g.p)}</p><div class="law">${esc(g.law)}</div><div class="go">소속 인물 보기 →</div></div></article>`}
+ return `<article class="panel gc" tabindex="0" role="button" data-g="${id}" aria-label="${esc(gg.name)} 인물 보기"><img src="${emb(gg.em)}" alt="" loading="lazy" decoding="async"><div><h4>${esc(gg.name)}</h4><span class="eng">${g.e}</span><div class="meta"><span class="t-${g.t}">${TIER[g.t]}</span><span>${esc(g.reg)}</span><span>수록 인물 ${n}명</span></div><p>${esc(g.p)}</p><div class="law">${esc(g.law)}</div><div class="go">소속 인물 보기 →</div></div></article>`}
 $('#gPlat').innerHTML=['olympus','valhalla','blackmoon','midas','leviathan','babel'].map(gcard).join('');
 $('#gMid').innerHTML=['clocktower','lighthouse','cloudcafe','sevenday','shade','brand'].map(gcard).join('');
 $$('.gc').forEach(el=>{const go=()=>{setFilter('player',el.dataset.g);$('#people').scrollIntoView()};el.addEventListener('click',go);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})});
@@ -91,7 +111,7 @@ function renderCards(){const q=st.q.toLowerCase();
  list=C.filter(c=>inCat(c,st.cat)&&(!st.sub||c.g===st.sub)&&(!q||(c.n+c.b+c.r+GN[c.g].name).toLowerCase().includes(q)));
  $('#count').textContent=`${list.length}명`;
  const cut=(!st.more&&!q&&!st.sub&&list.length>28)?28:list.length;
- $('#cards').innerHTML=list.length?list.slice(0,cut).map((c,i)=>`<button class="card" type="button" data-i="${i}"><span class="ph"><img loading="lazy" src="${head(c.id)}" alt="">${c.em?`<img class="em" src="${emb(c.em)}" alt="">`:''}${c.rk?`<span class="rk">#${c.rk}</span>`:''}${c.fl?`<span class="rk" style="color:#ff8ea2;border-color:rgba(255,77,109,.5)">${c.fl}층</span>`:''}</span><span class="tx"><span class="nm">${esc(c.n)}</span><span class="bh">${c.b?'「'+esc(c.b)+'」':''}</span><span class="rl">${esc(GN[c.g].name)} · ${esc(c.r)}</span></span></button>`).join('')+(cut<list.length?`<button class="more" type="button" id="more">${list.length}명 모두 보기</button>`:''):'<p class="empty">찾는 인물이 없습니다. 검색어를 바꾸거나 분류를 전체로 돌려 보세요.</p>';
+ $('#cards').innerHTML=list.length?list.slice(0,cut).map((c,i)=>`<button class="card" type="button" data-i="${i}"><span class="ph"><img loading="lazy" src="${head(c.id)}" alt="" decoding="async">${c.em?`<img class="em" src="${emb(c.em)}" alt="" loading="lazy" decoding="async">`:''}${c.rk?`<span class="rk">#${c.rk}</span>`:''}${c.fl?`<span class="rk" style="color:#ff8ea2;border-color:rgba(255,77,109,.5)">${c.fl}층</span>`:''}</span><span class="tx"><span class="nm">${esc(c.n)}</span><span class="bh">${c.b?'「'+esc(c.b)+'」':''}</span><span class="rl">${esc(GN[c.g].name)} · ${esc(c.r)}</span></span></button>`).join('')+(cut<list.length?`<button class="more" type="button" id="more">${list.length}명 모두 보기</button>`:''):'<p class="empty">찾는 인물이 없습니다. 검색어를 바꾸거나 분류를 전체로 돌려 보세요.</p>';
  const mb=$('#more');if(mb)mb.addEventListener('click',()=>{st.more=true;renderCards()});
  $$('#cards .card').forEach(b=>b.addEventListener('click',()=>openM(list,+b.dataset.i)))}
 setFilter('all');
@@ -128,7 +148,7 @@ function rels(t){const it=items(t),rest=[];let net='';
   const re=/⟦([^⟧]+)⟧\s*([^⟦]*?)(?=\s*,?\s*⟦|$)/g;let m;
   while((m=re.exec(net)))parts.push([m[1],m[2].replace(/[,\s]+$/,'')]);
   h+=`<div class="rels">${parts.map(([n,d])=>{const c=n&&byName[n];
-   if(c)return `<button type="button" class="rel" data-go="${c.id}"><img src="${head(c.id)}" alt="" loading="lazy"><span><b>${esc(n)}</b>${rich(d)}</span></button>`;
+   if(c)return `<button type="button" class="rel" data-go="${c.id}"><img src="${head(c.id)}" alt="" loading="lazy" decoding="async"><span><b>${esc(n)}</b>${rich(d)}</span></button>`;
    return `<div class="rel nolink"><span class="ph" aria-hidden="true">✦</span><span>${n?`<b>${esc(n)}</b>`:''}${rich(d)}</span></div>`}).join('')}</div>`}
  return h}
 const lines=t=>`<ul class="lines">${t.split('\n').filter(Boolean).map(s=>{const m=s.match(/^\(([^)]*)\)\s*(.*)$/);return m?`<li><i>${rich(m[1])}</i>${rich(m[2])}</li>`:`<li>${rich(s)}</li>`}).join('')}</ul>`;
@@ -144,7 +164,7 @@ function profHTML(c){const P=PROFS()[c.id];const toc=[];let out='';
   let look=g('외형'),rlook=null;if(look&&look.includes(' · 현실 외모: '))[look,rlook]=look.split(' · 현실 외모: ');
   if(g('게임')||g('현실 정체')){
    const on=g('게임')?`<section class="ps on"><h4>게임 속<small>ONLINE</small></h4>${body(g('게임'))}</section>`:'';
-   const off=g('현실 정체')?`<section class="ps off"><h4>현실<small>OFFLINE</small></h4>${isPlayer(c)?`<button type="button" class="rview" data-form="1"><img src="${head(c.id+'r')}" alt="" loading="lazy"><span>현실 모습 보기</span></button>`:''}${body(g('현실 정체')+(rlook?' · 현실 외모: '+rlook:''))}</section>`:'';
+   const off=g('현실 정체')?`<section class="ps off"><h4>현실<small>OFFLINE</small></h4>${isPlayer(c)?`<button type="button" class="rview" data-form="1"><img src="${head(c.id+'r')}" alt="" loading="lazy" decoding="async"><span>현실 모습 보기</span></button>`:''}${body(g('현실 정체')+(rlook?' · 현실 외모: '+rlook:''))}</section>`:'';
    out+=`<div class="duo" id="ps-duo">${on}${off}</div>`;toc.push(['duo','게임 · 현실'])}
   [['능력','능력','ABILITY'],['권능','권능','AUTHORITY'],['권능 / 힘','권능','AUTHORITY'],['힘','힘','POWER'],['현실에서의 힘','현실에서의 힘','POWER']].forEach(([l,t,e])=>{if(g(l))sec('pw',t,e,body(g(l)),c.c==='real'?'off':'')});
   ['솜니움을 보는 눈','렐릭타를 보는 눈','이야기를 보는 눈'].forEach(l=>{if(g(l))sec('gz',l,'GAZE',body(g(l)))});
@@ -177,7 +197,7 @@ function copyText(btn){const pre=btn.parentElement.querySelector('pre'),txt=pre.
  const fb=()=>{const r=document.createRange();r.selectNodeContents(pre);const s=getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='선택됨'};
  try{navigator.clipboard.writeText(txt).then(ok,fb)}catch(e){fb()}}
 let ml=[],mi=0,lastFocus=null,hist=[];
-function openM(arr,i){ml=arr;mi=i;hist=[];lastFocus=document.activeElement;fillM();$('#modal').classList.add('open');$('#mClose').focus()}
+function openM(arr,i){ml=arr;mi=i;hist=[];lastFocus=document.activeElement;fillM();$('#modal').classList.add('open');document.body.classList.add('modal-active');document.dispatchEvent(new Event('relicta:modal'));$('#mClose').focus()}
 const isPlayer=c=>['plat','mid','solo'].includes(c.c);
 function imgForms(c){if(isPlayer(c))return [[c.id,'게임 속'],[c.id+'r','현실']];
  if(c.alt)return c.n==='에테르딘'?[[c.id,'인간의 모습'],[c.alt,'신의 형상']]:[[c.id,'현실'],[c.alt,'아바타']];return [[c.id,'']]}
@@ -189,7 +209,7 @@ function fillImg(k){const c=ml[mi],F=imgForms(c);curForm=k=Math.min(k||0,F.lengt
  $('#mCap').textContent=`CHARACTER FILE · No.${c.id.replace(/\D/g,'')}${lab?' · '+lab:''}`;
  const t=$$('#mProf .nai [role=tab]');const j=t.findIndex(x=>x.dataset.l===lab);if(j>=0)naiTab(j)}
 function fillM(){const c=ml[mi],g=GN[c.g];
- $('#mFac').innerHTML=`${g.em?`<img src="${emb(g.em)}" alt="">`:''}<span>${esc(g.name)}</span>`;
+ $('#mFac').innerHTML=`${g.em?`<img src="${emb(g.em)}" alt="" loading="lazy" decoding="async">`:''}<span>${esc(g.name)}</span>`;
  $('#mName').textContent=c.n;$('#mBh').textContent=c.b?`「${c.b}」`:'';$('#mRl').textContent=c.r;
  const sp=specHTML(c);$('#mSpec').innerHTML=sp;$('#mSpec').hidden=!sp;
  const s=[];if(c.lv)s.push(['레벨',`Lv.${c.lv}`]);if(c.rk)s.push(['종합 랭킹',`${c.rk}위`]);else if(c.lv)s.push(['종합 랭킹','집계 외']);if(c.fl)s.push(['나락',`${c.fl}층`]);
@@ -210,7 +230,7 @@ $('#mProf').addEventListener('click',e=>{const b=e.target.closest('[data-go]');i
  const rv=e.target.closest('.rview');if(rv){fillImg(+rv.dataset.form);if(innerWidth<=760)$('.mbox').scrollTo({top:0,behavior:'smooth'});return}
  if(e.target.closest('.sxall')){const all=$$('#mProf .sx');const open=all.some(d=>!d.open);all.forEach(d=>d.open=open);e.target.closest('.sxall').textContent=open?'모두 닫기':'모두 열기'}});
 $('#mToc').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const el=$('#ps-'+b.dataset.k);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});
-function closeM(){$('#modal').classList.remove('open');hist=[];lastFocus&&lastFocus.focus()}
+function closeM(){$('#modal').classList.remove('open');document.body.classList.remove('modal-active');document.dispatchEvent(new Event('relicta:modal'));hist=[];lastFocus&&lastFocus.focus()}
 $('#mClose').addEventListener('click',closeM);
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeM()});
 $('#mPrev').addEventListener('click',()=>{mi=(mi-1+ml.length)%ml.length;hist=[];fillM()});
@@ -220,8 +240,8 @@ addEventListener('keydown',e=>{if(!$('#modal').classList.contains('open'))return
 /* ── 랭킹 ── */
 const ranked=C.filter(c=>c.rk).sort((a,b)=>a.rk-b.rk).slice(0,20);
 const gemSvg=col=>`<svg class="gem" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1 L17 8 L10 19 L3 8 Z" fill="${col}"/><path d="M10 1 L13 8 L10 19 L7 8 Z" fill="#fff" opacity=".35"/></svg>`;
-$('#podium').innerHTML=ranked.slice(0,3).map((c,i)=>`<article class="panel podium p${i+1}" tabindex="0" role="button" data-id="${c.id}"><span class="n">${['I','II','III'][i]}</span><img src="${head(c.id)}" alt=""><div><span>${i+1}위 · ${esc(GN[c.g].name)}</span><b>${esc(c.n)}</b><span style="color:var(--gold)">「${esc(c.b)}」 · Lv.${c.lv}</span></div></article>`).join('');
-$('#rbody').innerHTML=ranked.slice(3).map(c=>`<tr data-id="${c.id}" tabindex="0"><td>${c.rk<=10?gemSvg('#cdbcff'):''} ${c.rk}</td><td><span class="who"><img src="${head(c.id)}" alt="" loading="lazy">${esc(c.n)}</span></td><td>${esc(c.b)}</td><td>${esc(GN[c.g].name)}</td><td>Lv.${c.lv}</td></tr>`).join('');
+$('#podium').innerHTML=ranked.slice(0,3).map((c,i)=>`<article class="panel podium p${i+1}" tabindex="0" role="button" data-id="${c.id}"><span class="n">${['I','II','III'][i]}</span><img src="${head(c.id)}" alt="" loading="lazy" decoding="async"><div><span>${i+1}위 · ${esc(GN[c.g].name)}</span><b>${esc(c.n)}</b><span style="color:var(--gold)">「${esc(c.b)}」 · Lv.${c.lv}</span></div></article>`).join('');
+$('#rbody').innerHTML=ranked.slice(3).map(c=>`<tr data-id="${c.id}" tabindex="0"><td>${c.rk<=10?gemSvg('#cdbcff'):''} ${c.rk}</td><td><span class="who"><img src="${head(c.id)}" alt="" loading="lazy" decoding="async">${esc(c.n)}</span></td><td>${esc(c.b)}</td><td>${esc(GN[c.g].name)}</td><td>Lv.${c.lv}</td></tr>`).join('');
 $$('#podium [data-id],#rbody [data-id]').forEach(el=>{const go=()=>openM(ranked,ranked.findIndex(c=>c.id===el.dataset.id));el.addEventListener('click',go);el.addEventListener('keydown',e=>{if(e.key==='Enter'){go()}})});
 
 /* ── 나락 ── */
@@ -236,25 +256,35 @@ const FL=[
 ];
 const lords=C.filter(c=>c.g==='abyss').sort((a,b)=>a.fl-b.fl), rets=C.filter(c=>c.g==='retainers').sort((a,b)=>a.fl-b.fl);
 const abyssList=[...lords];
-$('#floors').innerHTML=FL.map((f,i)=>{const L=lords[i],T=rets[i];return `<article class="floor" tabindex="0" role="button" data-i="${i}" aria-label="${i+1}층 ${esc(L.n)} 자세히"><div class="b">B${i+1}<small>${f[0]}</small></div><img class="lord" src="${head(L.id)}" alt="" loading="lazy"><div><h4>${esc(L.n)}</h4><div class="dom">${esc(f[1])}</div><p>${esc(f[2])}</p><div class="mob">출현: ${esc(f[3])}</div></div><div class="ret" data-r="${T.id}"><img src="${head(T.id)}" alt="" loading="lazy"><span><b>${esc(T.n)}</b>${esc(T.r.replace(/^\d층 /,''))}</span></div></article>`}).join('');
+$('#floors').innerHTML=FL.map((f,i)=>{const L=lords[i],T=rets[i];return `<article class="floor" tabindex="0" role="button" data-i="${i}" aria-label="${i+1}층 ${esc(L.n)} 자세히"><div class="b">B${i+1}<small>${f[0]}</small></div><img class="lord" src="${head(L.id)}" alt="" loading="lazy" decoding="async"><div><h4>${esc(L.n)}</h4><div class="dom">${esc(f[1])}</div><p>${esc(f[2])}</p><div class="mob">출현: ${esc(f[3])}</div></div><div class="ret" data-r="${T.id}"><img src="${head(T.id)}" alt="" loading="lazy" decoding="async"><span><b>${esc(T.n)}</b>${esc(T.r.replace(/^\d층 /,''))}</span></div></article>`}).join('');
 $$('.floor').forEach(el=>{const go=e=>{const r=e.target.closest('.ret');if(r){openM(rets,rets.findIndex(c=>c.id===r.dataset.r))}else openM(lords,+el.dataset.i)};el.addEventListener('click',go);el.addEventListener('keydown',e=>{if(e.key==='Enter')openM(lords,+el.dataset.i)})});
 
 /* ── GNB 현재 위치 ── */
 const secs=$$('main section[id]');const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){$$('#gnav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}})},{rootMargin:'-45% 0px -50% 0px'});secs.forEach(s=>io.observe(s));
 
 /* ── 봉인 문서 ── */
+let sealedRequest=null;
+function ensureSealed(){if(window.RELICTA_SEALED)return Promise.resolve();if(sealedRequest)return sealedRequest;
+ sealedRequest=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='assets/js/sealed.js?v=1.2.0';script.async=true;
+  script.onload=()=>window.RELICTA_SEALED?resolve():reject(new Error('Missing document'));
+  script.onerror=()=>{script.remove();reject(new Error('Document unavailable'))};document.head.append(script)
+ }).catch(error=>{sealedRequest=null;throw error});return sealedRequest}
 let HID=[];
 function loadSealed(){if(HID.length)return;const s=PJ(window.RELICTA_SEALED);
  s.chars.forEach(c=>{if(!byId[c.id]){C.push(c);byId[c.id]=c;byName[c.n]=c}});
  const P=PROFS();Object.entries(s.prof||{}).forEach(([id,o])=>{P[id]=o.p;HSEC[id]=o.s});Object.assign(NAIX().tags,s.nai||{});
  HID=s.hid;HID.forEach(h=>{const c=byId[h.id];c.t=h.p;c.r=h.sf});
- $('#secret').innerHTML=s.html}
-function fillHidden(){$('#hidden').innerHTML=HID.map((h,i)=>{const c=byId[h.id];return `<article class="hc" tabindex="0" role="button" data-i="${i}"><img src="${head(c.id)}" alt="" loading="lazy"><div><b>${esc(c.n)}</b><div class="sf">${esc(h.sf)}</div><p>${esc(h.p)}</p></div></article>`}).join('');
+ $('#secret').innerHTML=s.html;watchEffects($('#secret'))}
+function fillHidden(){$('#hidden').innerHTML=HID.map((h,i)=>{const c=byId[h.id];return `<article class="hc" tabindex="0" role="button" data-i="${i}"><img src="${head(c.id)}" alt="" loading="lazy" decoding="async"><div><b>${esc(c.n)}</b><div class="sf">${esc(h.sf)}</div><p>${esc(h.p)}</p></div></article>`}).join('');
  const hl=HID.map(h=>byId[h.id]);$$('.hc').forEach(el=>{el.addEventListener('click',()=>openM(hl,+el.dataset.i));el.addEventListener('keydown',e=>{if(e.key==='Enter')openM(hl,+el.dataset.i)})})}
 function unseal(){loadSealed();$('#seal').classList.add('open');fillHidden();try{sessionStorage.setItem('relicta-unsealed','1')}catch(e){}}
 $('#unseal').addEventListener('click',()=>{$('#dlg').classList.add('open');$('#dlgYes').focus()});
-$('#dlgNo').addEventListener('click',()=>{$('#dlg').classList.remove('open');$('#unseal').focus()});
-$('#dlgYes').addEventListener('click',()=>{$('#dlg').classList.remove('open');unseal();$('#secret').scrollIntoView()});
+let sealAttempt=0;
+$('#dlgNo').addEventListener('click',()=>{sealAttempt++;$('#dlg').classList.remove('open');$('#unseal').focus()});
+$('#dlgYes').addEventListener('click',async()=>{const attempt=++sealAttempt,btn=$('#dlgYes'),status=$('#sealStatus');btn.disabled=true;btn.textContent='불러오는 중…';status.hidden=true;
+ try{await ensureSealed();if(attempt!==sealAttempt)return;unseal();$('#dlg').classList.remove('open');$('#secret').scrollIntoView()}
+ catch(e){if(attempt===sealAttempt){status.hidden=false;status.textContent='문서를 불러오지 못했습니다. 연결을 확인하고 다시 시도해주세요.'}}
+ finally{btn.disabled=false;btn.textContent='열람하기'}});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#dlg').classList.contains('open'))$('#dlgNo').click()});
-try{if(sessionStorage.getItem('relicta-unsealed'))unseal()}catch(e){}
+try{if(sessionStorage.getItem('relicta-unsealed'))ensureSealed().then(unseal).catch(()=>{})}catch(e){}
 })();
