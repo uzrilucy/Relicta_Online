@@ -1,0 +1,162 @@
+(()=>{
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const C=D.chars, byId=Object.fromEntries(C.map(c=>[c.id,c])), GN=Object.fromEntries(D.groups.map(g=>[g.id,g]));
+const head=id=>`img/${id}_h.webp`, full=id=>`img/${id}_f.webp`, emb=e=>`emblem/${e}.svg`;
+
+/* ── 별하늘 ── */
+(()=>{const cv=$('#stars'),x=cv.getContext('2d');let W,H,S=[];const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function rs(){W=cv.width=innerWidth*devicePixelRatio;H=cv.height=innerHeight*devicePixelRatio;S=Array.from({length:Math.round(W*H/9000)},()=>({x:Math.random()*W,y:Math.random()*H,r:(Math.random()*1.2+.3)*devicePixelRatio,p:Math.random()*6.3,s:.4+Math.random()*1.2,g:Math.random()<.12}))}
+function draw(t){x.clearRect(0,0,W,H);for(const s of S){const a=still?.6:.35+.65*Math.abs(Math.sin(s.p+t/1000*s.s*.6));x.globalAlpha=a;x.fillStyle=s.g?'#ebd6a4':'#e9e1ff';x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fill()}if(!still)requestAnimationFrame(draw)}
+addEventListener('resize',rs);rs();requestAnimationFrame(draw)})();
+
+/* ── 동시 접속 ── */
+(()=>{let n=1512804117;const el=$('#ccu');if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;setInterval(()=>{n+=Math.round((Math.random()-.45)*4800);el.textContent=n.toLocaleString('ko-KR')},1600)})();
+
+/* ── 소식 ── */
+const NEWS=[
+{k:'notice',t:'렐릭타 온라인 서비스 3주년을 맞이하며',d:'2076.04.03',b:['2073년 4월 3일, 첫 에테르 클론이 시작의 신전에서 눈을 뜬 지 꼭 3년이 되었습니다. 오늘 이 순간에도 15억 명의 솜니움이 엘리시온의 하늘 아래 각자의 이야기를 쓰고 있습니다.','회장님께서는 여러분이 만들어 갈 다음 장면을 누구보다 기대하고 계십니다. 부디 예측할 수 없는 이야기를 들려주십시오.'],s:'오네이로스 네트워크 비서실장 이현오'},
+{k:'event',t:'[3주년] 기적의 제단 특별 개방 — 빛기둥 연출 강화',d:'2076.04.03',b:['3주년을 기념해 모든 마을의 제단에 특별 빛기둥 연출이 적용됩니다. 신급 아이템 획득 시 서버 전체 방송과 함께 3주년 기념 칭호 「기적의 목격자」가 지급됩니다.','제단의 확률 정보는 운영 정책에 따라 공개하지 않습니다. 빛의 색은 등급과 무관합니다.'],s:'라이브운영팀'},
+{k:'notice',t:'붉은 낙인 정책 재안내 (엘리시안 주민 대상 PK)',d:'2076.03.28',b:['엘리시안 주민을 살해한 솜니움에게는 영구적인 붉은 낙인이 부여됩니다. 낙인 상태에서는 퀘스트를 받을 수 없으며, 모든 몬스터의 적대가 최대로 고정됩니다.','붉은 낙인을 해제하는 방법은 존재하지 않습니다. 낙인 해제를 미끼로 한 사기 거래에 주의해 주십시오.'],s:'라이브운영팀 GM 결'},
+{k:'notice',t:'나락 원정 시 강제 로그아웃 불가 현상 관련 안내',d:'2076.03.21',b:['나락 4층 「소리를 삼키는 잿빛 사막」에서 강제 로그아웃 후 아바타가 혼수 상태로 남는 현상, 7층 「깨어나지 않는 정원」에서 로그아웃 버튼이 보이지 않는 현상이 접수되고 있습니다.','해당 현상은 콘텐츠의 의도된 기믹이며, 자율 AI 코어의 판단에 따라 별도 조치는 진행되지 않습니다. 현실의 캡슐에서 의료 경보가 울릴 경우 즉시 솜누스 의료센터로 연락해 주십시오.'],s:'라이브운영팀'},
+{k:'update',t:'「바벨 강의」 공식 가이드 방송 제휴 안내',d:'2076.03.15',b:['플래티넘 길드 바벨의 공식 방송 「바벨 강의」와 신규 솜니움 가이드 제휴를 시작합니다. 시작의 신전 게시판에서 방송 채널로 바로 이동할 수 있습니다.'],s:'라이브운영팀'},
+{k:'check',t:'4월 7일(화) 정기 점검 안내 (06:00~10:00)',d:'2076.04.04',b:['점검 시간 동안 접속 중인 솜니움은 순차적으로 로그아웃됩니다. 장시간 다이브 중인 이용자께서는 캡슐 영양 팩 잔량을 미리 확인해 주십시오.','점검 중에도 하늘의 붉은 눈은 관측됩니다. 이는 정상입니다.'],s:'라이브운영팀'},
+{k:'notice',t:'통각 제한 해제 불법 모듈 단속 협조 안내',d:'2076.02.27',b:['통각 제한(30%)을 해제하는 불법 모듈의 사용은 「가상공간 안전법」 위반입니다. 국가 가상공간안전처의 단속에 협조하고 있으며, 적발 시 계정이 영구 정지됩니다.'],s:'콘텐츠 안전팀'},
+{k:'update',t:'[대격변 패치] 나락 개방 · 일곱 군주 등장',d:'2075.10.31',b:['아우렐리아와 레노아 사이 바다 밑에 끝없는 지하 지옥 「나락」이 열립니다. 입구는 코발트 군도 끝자락에 생성되며, 각 층의 군주는 처치할 수 없습니다.','패치 이후 하늘에 붉은 눈이 관측되며, 기존 몬스터가 전반적으로 강화됩니다.'],s:'개발팀'},
+];
+function renderNews(k){$('#posts').innerHTML=NEWS.filter(n=>k==='all'||n.k===k).map((n,i)=>`<details class="post"${i===0&&k==='all'?' open':''}><summary><span class="k ${n.k}">${{notice:'공지',update:'업데이트',event:'이벤트',check:'점검'}[n.k]}</span><span class="tt">${esc(n.t)}</span><span class="dt">${n.d}</span></summary><div class="body">${n.b.map(p=>`<p>${esc(p)}</p>`).join('')}<p class="sign">— ${esc(n.s)}</p></div></details>`).join('')}
+$$('.tabs button').forEach(b=>b.addEventListener('click',()=>{$$('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));renderNews(b.dataset.k)}));
+renderNews('all');
+
+/* ── 지도 ── */
+const R={
+zero:{k:'접근 불가 · 정중앙',n:'제0구역',e:'Sanctuary of Genesis',p:'하늘에 떠 있는 거대하고 순결한 부유대륙, 「창세의 성역」. 붉은 결계로 봉인되어 있으며 지배 길드는 없습니다. 모든 솜니움의 궁극 목표입니다.',sys:'[Damage: 0 (Immune)]<br>[Condition: ???]'},
+abyss:{k:'접근 주의 · 바다 밑',n:'나락 입구',e:'The Abyss',p:'대격변 패치와 함께 두 대륙 사이 바다 밑에 열린 일곱 층의 지하 지옥. 용암과 독기가 가득하고, 일곱 군주는 처치할 수 없습니다.',dl:[['입구','코발트 군도 끝자락'],['인근 세력','리바이어던, 등대지기']],sys:'[WARNING] 강제 로그아웃 불가 구역 포함'},
+krater:{k:'레노아 · 북',n:'크라테르 설원',e:'Krater Snowfield',g:'valhalla',p:'혹한의 설원. 최상급 광석과 강화석 광산이 있습니다.',dl:[['지배','발할라'],['법','힘이 곧 법. 세금은 거의 없고, 발할라 길드원을 결투로 이기면 1주일 채굴권'],['산하·거주','칠일장']]},
+mementos:{k:'레노아 · 고대 유적',n:'메멘토스 유적',e:'Mementos Ruins',g:'babel',p:'뒤틀린 중력과 떠다니는 잔해. 렐릭타 최고의 꿈조각 발굴지입니다.',dl:[['지배','바벨'],['법','지식 독점. 모든 던전 입구를 쥐고, 획득한 꿈조각의 50%를 상납받는다']]},
+redsand:{k:'레노아 · 서',n:'레드샌드 협곡',e:'Redsand Canyon',g:'midas',p:'극한 기후의 사막. 몬스터 리젠 1위 사냥터입니다.',dl:[['지배','마이다스 신디케이트'],['법','모든 장비와 포션은 마이다스 승인가로만 거래. 위반 시 고용 용병이 처단'],['산하·거주','그늘(무허가)']]},
+arcadia:{k:'레노아 · 중앙',n:'아르카디아 분지',e:'Arcadia Basin',g:'olympus',p:'비옥한 평원이자 경제의 중심. 길드 성을 세우기에 가장 좋은 노른자 땅입니다.',dl:[['지배','올림포스'],['법','PK 전면 금지. 대신 상업세 30%와 산하 길드의 주간 다이아 공물'],['산하·거주','시계탑']]},
+silveria:{k:'레노아 · 동',n:'실베리아 몽환림',e:'Silveria Dreamwood',g:'blackmoon',p:'안개 늪과 고목의 숲. 희귀 마수와 연금·요리 재료가 납니다.',dl:[['지배','검은 달'],['법','그림자 통행세. 통행증 없이 사냥하면 추적과 경험치 흡수. PK 청부도 받는다'],['산하·거주','구름다방']]},
+cobalt:{k:'레노아 · 남',n:'코발트 군도',e:'Cobalt Archipelago',g:'leviathan',p:'휴양지 같은 섬들. 해상전의 중심이며, 영토 끝자락에 나락 입구가 열렸습니다.',dl:[['지배','리바이어던'],['법','절대 무법. 세금도 보호도 없다. 길드장이 재미로 개인 섬을 포격한다'],['산하·거주','등대지기']]},
+solarium:{k:'아우렐리아 · 중앙',n:'솔라리움 제국',e:'Solarium Empire',el:'solarium',p:'최강의 군사력과 오만한 귀족 사회. 귀족들은 솜니움을 경멸하면서도 그들이 들여오는 사치품의 가장 큰손입니다.',dl:[['솜니움을 부르는 말','불사자 용병']]},
+marcatus:{k:'아우렐리아 · 남서 해안',n:'마르카투스 왕국',e:'Kingdom of Marcatus',el:'marcatus',p:'항구와 경매장의 상업 왕국. 솜니움을 가장 크게 환영하는 교역의 중심지입니다.',dl:[['솜니움을 부르는 말','손님']]},
+valor:{k:'아우렐리아 · 북방',n:'발로르 왕국',e:'Kingdom of Valor',el:'valor',p:'순수한 무력의 나라. 꿈조각에 기대는 솜니움을 경멸하지만, 맨몸의 전투 감각을 증명하면 깊이 존중합니다. 낙인자는 국경에서 벱니다.',dl:[['솜니움을 부르는 말','꿈 도둑']]},
+arcanum:{k:'아우렐리아 · 서',n:'아르카눔 왕국',e:'Kingdom of Arcanum',el:'arcanum',p:'마법과 학자의 나라. 고대 기적에 집착하며, 학자들은 솜니움을 연구하고 해부하고 싶어 합니다.',dl:[['솜니움을 부르는 말','표본']]},
+silvanus:{k:'아우렐리아 · 동',n:'실바누스 왕국',e:'Kingdom of Silvanus',el:'silvanus',p:'숲과 밭의 농업국. 솜니움 덕분에 마수 피해에서 회복하고 있으며, 솜니움 요리사에게 최상급 식재료를 댑니다.',dl:[['솜니움을 부르는 말','은인']]},
+sanctus:{k:'아우렐리아 · 남',n:'상투스 왕국',e:'Kingdom of Sanctus',el:'sanctus',p:'절대신을 광신하는 신정 국가. 솜니움을 신이 보낸 천사이자 사도로 숭배합니다.',dl:[['솜니움을 부르는 말','천사, 사도']]},
+noctua:{k:'아우렐리아 · 지하',n:'녹투아 왕국',e:'Kingdom of Noctua',el:'noctua',p:'빈민가와 지하 암시장의 나라. 장물, 불법 정보, 밀수 꿈조각이 돌고, 낙인자들의 마지막 피난처가 됩니다.',dl:[['솜니움을 부르는 말','돈 많은 유령'],['산하·거주','낙인 (지하)']]},
+};
+function region(id){const r=R[id];$$('.hs').forEach(h=>h.classList.toggle('on',h.dataset.r===id));
+ const g=r.g?D.groups.find(x=>x.id===r.g):null;
+ $('#rinfo').innerHTML=`<span class="kind">${esc(r.k)}</span>${g?`<img class="em" src="${emb(g.em)}" alt="${esc(g.name)} 엠블럼">`:''}<h3>${esc(r.n)}</h3><span class="eng">${esc(r.e)}</span><p>${esc(r.p)}</p>${r.dl?`<dl>${r.dl.map(([a,b])=>`<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('')}</dl>`:''}${r.sys?`<div class="sys">${r.sys}</div>`:''}${(r.g||r.el)?`<a class="btn ghost" style="align-self:flex-start;margin-top:6px" href="#people" data-jump="${r.g||r.el}">이 지역의 인물 보기</a>`:''}${id==='abyss'?`<a class="btn ghost" style="align-self:flex-start;margin-top:6px" href="#abyss">나락 층별 정보</a>`:''}`;
+ const j=$('#rinfo [data-jump]');if(j)j.addEventListener('click',()=>{setFilter(GN[j.dataset.jump].c==='plat'||GN[j.dataset.jump].c==='mid'?'player':(GN[j.dataset.jump].c==='elys'?'elys':'all'),j.dataset.jump)})}
+$$('.hs').forEach(h=>{h.addEventListener('click',()=>region(h.dataset.r));h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();region(h.dataset.r)}})});
+region('zero');
+
+/* ── 길드 ── */
+const GUILD={
+olympus:{e:'OLYMPOS',t:'plat',reg:'아르카디아 분지',p:'12신의 이름을 딴 12좌 평의회가 다스리는 귀족정. 좌석은 실력으로 따내거나 거액에 사고판다.',law:'PK 전면 금지 · 상업세 30% · 산하 길드 주간 다이아 공물'},
+valhalla:{e:'VALHALLA',t:'plat',reg:'크라테르 설원',p:'결투 서열이 곧 계급인 전사의 전당. 현실의 운동선수와 격투가가 몰려 있다.',law:'힘이 곧 법 · 세금 거의 0% · 결투로 이기면 1주일 채굴권'},
+blackmoon:{e:'BLACK MOON',t:'plat',reg:'실베리아 몽환림',p:'수뇌부가 달의 위상을 코드네임으로 쓰는 익명 조직. 길드원끼리도 서로의 현실 정체를 모른다.',law:'그림자 통행세 · 무단 사냥 시 추적과 경험치 흡수 · PK 청부'},
+midas:{e:'MIDAS SYNDICATE',t:'plat',reg:'레드샌드 협곡',p:'회장과 이사가 다스리는 기업형 길드. 장인과 상인과 요리사가 모였고, 돈으로 최상위 랭커를 산다.',law:'모든 장비·포션은 마이다스 승인가로만 · 위반 시 용병이 처단'},
+leviathan:{e:'LEVIATHAN',t:'plat',reg:'코발트 군도',p:'빌런 롤플레이를 즐기는 해적 선단. 영토 끝에 나락 입구가 열리며 원정의 최전선이 됐다.',law:'절대 무법 · 세금도 보호도 없음'},
+babel:{e:'BABEL',t:'plat',reg:'메멘토스 유적',p:'유적 위 10층 탑의 층주 서열로 움직이는 마법사 학회. 6길드 중 시스템의 비밀에 가장 가깝다.',law:'지식 독점 · 모든 던전 입구 장악 · 꿈조각 50% 상납'},
+clocktower:{e:'CLOCKTOWER',t:'gold',reg:'아르카디아 · 올림포스 산하',p:'올림포스에 공물을 가장 먼저, 가장 정확하게 바치는 모범 산하 길드. 아르카디아 동쪽 시계탑 성의 주인.',law:'매주 월요일 정각, 공물 납부'},
+lighthouse:{e:'LIGHTKEEPERS',t:'silver',reg:'코발트 군도 · 나락 입구',p:'나락에 갇힌 아바타를 건져 오는 유일한 전문 구조대. 낡은 등대가 거점이다.',law:'구조비 정가제 · 낼 수 없으면 순서가 밀린다'},
+cloudcafe:{e:'CLOUD TEAROOM',t:'bronze',reg:'실베리아 몽환림 언저리',p:'숲의 재료로 차와 디저트를 내는 작은 찻집. 꿈은 하늘 영토로 이사 가는 것.',law:'검은 달에 통행세 납부'},
+sevenday:{e:'SEVEN DAYS',t:'silver',reg:'크라테르 설원',p:'매주 일요일 발할라에 결투를 거는 광부 길드. 1년째 한 번도 이기지 못했다. 52전 52패.',law:'목표: 1주일 채굴권'},
+shade:{e:'SHADE',t:'silver',reg:'레드샌드 협곡 (무허가)',p:'승인가를 깨고 가난한 유저에게 싼 포션을 흘리는 밀거래 길드. 사막 유저들에겐 의적이다.',law:'마이다스 현상금 목록 상위'},
+brand:{e:'BRANDED',t:'bronze',reg:'아우렐리아 녹투아 지하',p:'붉은 낙인을 받은 자들의 은신처. 퀘스트를 받을 수 없는 사람들의 마지막 집.',law:'"누군가를 위해" 낙인을 받은 사람만 거둔다'},
+};
+const TIER={plat:'플래티넘',gold:'골드',silver:'실버',bronze:'브론즈'};
+function gcard(id){const g=GUILD[id],gg=GN[id],n=C.filter(c=>c.g===id).length;
+ return `<article class="panel gc" tabindex="0" role="button" data-g="${id}" aria-label="${esc(gg.name)} 인물 보기"><img src="${emb(gg.em)}" alt=""><div><h4>${esc(gg.name)}</h4><span class="eng">${g.e}</span><div class="meta"><span class="t-${g.t}">${TIER[g.t]}</span><span>${esc(g.reg)}</span><span>수록 인물 ${n}명</span></div><p>${esc(g.p)}</p><div class="law">${esc(g.law)}</div><div class="go">소속 인물 보기 →</div></div></article>`}
+$('#gPlat').innerHTML=['olympus','valhalla','blackmoon','midas','leviathan','babel'].map(gcard).join('');
+$('#gMid').innerHTML=['clocktower','lighthouse','cloudcafe','sevenday','shade','brand'].map(gcard).join('');
+$$('.gc').forEach(el=>{const go=()=>{setFilter('player',el.dataset.g);$('#people').scrollIntoView()};el.addEventListener('click',go);el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}})});
+
+/* ── 인물 도감 ── */
+const CATS=[['all','전체'],['player','솜니움 (플레이어)'],['elys','엘리시안 (7국)'],['abyss','나락'],['real','네오 서울']];
+const SUB={player:['olympus','valhalla','blackmoon','midas','leviathan','babel','clocktower','lighthouse','cloudcafe','sevenday','shade','brand','unaffiliated'],elys:['solarium','marcatus','valor','arcanum','silvanus','sanctus','noctua'],abyss:['abyss','retainers'],real:['reality']};
+const inCat=(c,k)=>k==='all'?c.c!=='hidden':(k==='player'?['plat','mid','solo'].includes(c.c):c.c===k);
+let st={cat:'all',sub:null,q:'',more:false},list=[];
+$('#cats').innerHTML=CATS.map(([k,l])=>`<button type="button" data-c="${k}" aria-pressed="${k==='all'}">${l}</button>`).join('');
+function renderSubs(){const s=SUB[st.cat];$('#subs').innerHTML=s?[`<button type="button" data-s="" aria-pressed="${!st.sub}">전체</button>`,...s.map(id=>`<button type="button" data-s="${id}" aria-pressed="${st.sub===id}">${esc(GN[id].name)}</button>`)].join(''):'';
+ $$('#subs button').forEach(b=>b.addEventListener('click',()=>{st.sub=b.dataset.s||null;renderSubs();renderCards()}))}
+function setFilter(cat,sub){st.cat=cat;st.sub=sub||null;st.more=false;$$('#cats button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.c===cat));renderSubs();renderCards()}
+window.__setFilter=setFilter;
+$$('#cats button').forEach(b=>b.addEventListener('click',()=>setFilter(b.dataset.c,null)));
+$('#q').addEventListener('input',e=>{st.q=e.target.value.trim();renderCards()});
+function renderCards(){const q=st.q.toLowerCase();
+ list=C.filter(c=>inCat(c,st.cat)&&(!st.sub||c.g===st.sub)&&(!q||(c.n+c.b+c.r+GN[c.g].name).toLowerCase().includes(q)));
+ $('#count').textContent=`${list.length}명`;
+ const cut=(!st.more&&!q&&!st.sub&&list.length>28)?28:list.length;
+ $('#cards').innerHTML=list.length?list.slice(0,cut).map((c,i)=>`<button class="card" type="button" data-i="${i}"><span class="ph"><img loading="lazy" src="${head(c.id)}" alt="">${c.em?`<img class="em" src="${emb(c.em)}" alt="">`:''}${c.rk?`<span class="rk">#${c.rk}</span>`:''}${c.fl?`<span class="rk" style="color:#ff8ea2;border-color:rgba(255,77,109,.5)">${c.fl}층</span>`:''}</span><span class="tx"><span class="nm">${esc(c.n)}</span><span class="bh">${c.b?'「'+esc(c.b)+'」':''}</span><span class="rl">${esc(GN[c.g].name)} · ${esc(c.r)}</span></span></button>`).join('')+(cut<list.length?`<button class="more" type="button" id="more">${list.length}명 모두 보기</button>`:''):'<p class="empty">찾는 인물이 없습니다. 검색어를 바꾸거나 분류를 전체로 돌려 보세요.</p>';
+ const mb=$('#more');if(mb)mb.addEventListener('click',()=>{st.more=true;renderCards()});
+ $$('#cards .card').forEach(b=>b.addEventListener('click',()=>openM(list,+b.dataset.i)))}
+setFilter('all');
+
+/* 모달 */
+let ml=[],mi=0,lastFocus=null;
+function openM(arr,i){ml=arr;mi=i;lastFocus=document.activeElement;fillM();$('#modal').classList.add('open');$('#mClose').focus()}
+function fillM(alt){const c=ml[mi],g=GN[c.g];const id=alt?c.alt:c.id;
+ $('#mImg').src=full(id);$('#mImg').alt=`${c.n} 전신 일러스트`;
+ $('#mAlt').innerHTML=c.alt?`<button type="button" aria-pressed="${!alt}" data-a="0">${c.c==='hidden'?'인간의 모습':'현실'}</button><button type="button" aria-pressed="${!!alt}" data-a="1">${c.n==='에테르딘'?'신의 형상':'아바타'}</button>`:'';
+ $$('#mAlt button').forEach(b=>b.addEventListener('click',()=>fillM(b.dataset.a==='1')));
+ $('#mFac').innerHTML=`${g.em?`<img src="${emb(g.em)}" alt="">`:''}<span>${esc(g.name)}</span>`;
+ $('#mName').textContent=c.n;$('#mBh').textContent=c.b?`「${c.b}」`:'';$('#mRl').textContent=c.r;
+ const s=[];if(c.lv)s.push(['레벨',`Lv.${c.lv}`]);if(c.rk)s.push(['종합 랭킹',`${c.rk}위`]);else if(c.lv)s.push(['종합 랭킹','집계 외']);if(c.fl)s.push(['나락',`${c.fl}층`]);
+ $('#mStats').innerHTML=s.map(([a,b])=>`<div><small>${a}</small><b>${b}</b></div>`).join('');
+ $('#mQ').style.display=c.q?'':'none';$('#mQ').textContent=c.q;
+ $('#mTx').style.display=c.t?'':'none';$('#mTx').textContent=c.t;
+ $('#mPrev').disabled=ml.length<2;$('#mNext').disabled=ml.length<2}
+function closeM(){$('#modal').classList.remove('open');lastFocus&&lastFocus.focus()}
+$('#mClose').addEventListener('click',closeM);
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeM()});
+$('#mPrev').addEventListener('click',()=>{mi=(mi-1+ml.length)%ml.length;fillM()});
+$('#mNext').addEventListener('click',()=>{mi=(mi+1)%ml.length;fillM()});
+addEventListener('keydown',e=>{if(!$('#modal').classList.contains('open'))return;if(e.key==='Escape')closeM();if(e.key==='ArrowLeft')$('#mPrev').click();if(e.key==='ArrowRight')$('#mNext').click()});
+
+/* ── 랭킹 ── */
+const ranked=C.filter(c=>c.rk).sort((a,b)=>a.rk-b.rk).slice(0,20);
+const gemSvg=col=>`<svg class="gem" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1 L17 8 L10 19 L3 8 Z" fill="${col}"/><path d="M10 1 L13 8 L10 19 L7 8 Z" fill="#fff" opacity=".35"/></svg>`;
+$('#podium').innerHTML=ranked.slice(0,3).map((c,i)=>`<article class="panel podium p${i+1}" tabindex="0" role="button" data-id="${c.id}"><span class="n">${['I','II','III'][i]}</span><img src="${head(c.id)}" alt=""><div><span>${i+1}위 · ${esc(GN[c.g].name)}</span><b>${esc(c.n)}</b><span style="color:var(--gold)">「${esc(c.b)}」 · Lv.${c.lv}</span></div></article>`).join('');
+$('#rbody').innerHTML=ranked.slice(3).map(c=>`<tr data-id="${c.id}" tabindex="0"><td>${c.rk<=10?gemSvg('#cdbcff'):''} ${c.rk}</td><td><span class="who"><img src="${head(c.id)}" alt="" loading="lazy">${esc(c.n)}</span></td><td>${esc(c.b)}</td><td>${esc(GN[c.g].name)}</td><td>Lv.${c.lv}</td></tr>`).join('');
+$$('#podium [data-id],#rbody [data-id]').forEach(el=>{const go=()=>openM(ranked,ranked.findIndex(c=>c.id===el.dataset.id));el.addEventListener('click',go);el.addEventListener('keydown',e=>{if(e.key==='Enter'){go()}})});
+
+/* ── 나락 ── */
+const FL=[
+['오만','거꾸로 매달린 황금성','뒤틀린 중력 탓에 방심하면 "위로" 추락한다. 대공과 눈이 마주치면 즉사한다.','황금 가고일, 거꾸로 선 근위대'],
+['탐욕','저주받은 보석 광맥','현금화할 수 있는 최상급 보석이 깔렸다. 보석을 인벤토리에 넣으면 초마다 HP가 깎인다.','보석 미믹, 금화 골렘'],
+['분노','피가 끓는 칼데라','입장하는 즉시 강제 PvP. 파티원끼리도 서로를 공격할 수 있다.','피의 망령 검투사'],
+['나태','소리를 삼키는 잿빛 사막','머물수록 이동과 시전 속도가 최대 99%까지 느려진다. 소리를 내면 공자가 깬다.','재의 모래벌레, 잠꼬대 그림자'],
+['질투','깨진 거울의 수정 미궁','거울에 비친 모습이 도플갱어가 되어 기어 나온다.','도플갱어, 거울 파편 정령'],
+['폭식','부해의 위장','장기 속 같은 유기질 지형. 위산 웅덩이가 장비 내구도를 깎는다.','위산 슬라임, 식탐 인형'],
+['탐닉','깨어나지 않는 정원','빛나는 기이한 식물로 가득한 최하층. 포자가 행복한 환각을 일으켜 현실의 기억을 흐린다.','꿈을 먹는 몽마 무리, 발광 포자 식물'],
+];
+const lords=C.filter(c=>c.g==='abyss').sort((a,b)=>a.fl-b.fl), rets=C.filter(c=>c.g==='retainers').sort((a,b)=>a.fl-b.fl);
+const abyssList=[...lords];
+$('#floors').innerHTML=FL.map((f,i)=>{const L=lords[i],T=rets[i];return `<article class="floor" tabindex="0" role="button" data-i="${i}" aria-label="${i+1}층 ${esc(L.n)} 자세히"><div class="b">B${i+1}<small>${f[0]}</small></div><img class="lord" src="${head(L.id)}" alt="" loading="lazy"><div><h4>${esc(L.n)}</h4><div class="dom">${esc(f[1])}</div><p>${esc(f[2])}</p><div class="mob">출현: ${esc(f[3])}</div></div><div class="ret" data-r="${T.id}"><img src="${head(T.id)}" alt="" loading="lazy"><span><b>${esc(T.n)}</b>${esc(T.r.replace(/^\d층 /,''))}</span></div></article>`}).join('');
+$$('.floor').forEach(el=>{const go=e=>{const r=e.target.closest('.ret');if(r){openM(rets,rets.findIndex(c=>c.id===r.dataset.r))}else openM(lords,+el.dataset.i)};el.addEventListener('click',go);el.addEventListener('keydown',e=>{if(e.key==='Enter')openM(lords,+el.dataset.i)})});
+
+/* ── GNB 현재 위치 ── */
+const secs=$$('main section[id]');const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){$$('#gnav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}})},{rootMargin:'-45% 0px -50% 0px'});secs.forEach(s=>io.observe(s));
+
+/* ── 봉인 문서 ── */
+let HID=[];
+function loadSealed(){if(HID.length)return;
+ const k='RELICTA',b=atob(window.RELICTA_SEALED||''),u=new Uint8Array(b.length);
+ for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i)^k.charCodeAt(i%k.length);
+ const s=JSON.parse(new TextDecoder('utf-8').decode(u));
+ s.chars.forEach(c=>{if(!byId[c.id]){C.push(c);byId[c.id]=c}});
+ HID=s.hid;HID.forEach(h=>{const c=byId[h.id];c.t=h.p;c.r=h.sf});
+ $('#secret').innerHTML=s.html}
+function fillHidden(){$('#hidden').innerHTML=HID.map((h,i)=>{const c=byId[h.id];return `<article class="hc" tabindex="0" role="button" data-i="${i}"><img src="${head(c.id)}" alt="" loading="lazy"><div><b>${esc(c.n)}</b><div class="sf">${esc(h.sf)}</div><p>${esc(h.p)}</p></div></article>`}).join('');
+ const hl=HID.map(h=>byId[h.id]);$$('.hc').forEach(el=>{el.addEventListener('click',()=>openM(hl,+el.dataset.i));el.addEventListener('keydown',e=>{if(e.key==='Enter')openM(hl,+el.dataset.i)})})}
+function unseal(){loadSealed();$('#seal').classList.add('open');fillHidden();try{sessionStorage.setItem('relicta-unsealed','1')}catch(e){}}
+$('#unseal').addEventListener('click',()=>{$('#dlg').classList.add('open');$('#dlgYes').focus()});
+$('#dlgNo').addEventListener('click',()=>{$('#dlg').classList.remove('open');$('#unseal').focus()});
+$('#dlgYes').addEventListener('click',()=>{$('#dlg').classList.remove('open');unseal();$('#secret').scrollIntoView()});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#dlg').classList.contains('open'))$('#dlgNo').click()});
+try{if(sessionStorage.getItem('relicta-unsealed'))unseal()}catch(e){}
+})();
