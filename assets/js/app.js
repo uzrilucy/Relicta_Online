@@ -36,6 +36,7 @@ document.addEventListener('visibilitychange',()=>document.body.classList.toggle(
 /* ── 소식 ── */
 const NEWS=[
 {k:'notice',t:'렐릭타 온라인 서비스 3주년을 맞이하며',d:'2076.04.03',b:['2073년 4월 3일, 첫 에테르 클론이 시작의 신전에서 눈을 뜬 지 꼭 3년이 되었습니다. 오늘 이 순간에도 15억 명의 솜니움이 엘리시온의 하늘 아래 각자의 이야기를 쓰고 있습니다.','회장님께서는 여러분이 만들어 갈 다음 장면을 누구보다 기대하고 계십니다. 부디 예측할 수 없는 이야기를 들려주십시오.'],s:'오네이로스 네트워크 비서실장 이현오'},
+{k:'update',t:'솜니움 기록 동기화 모듈 개선 안내',d:'2076.04.05',b:['일부 접속 단말에서 다이브 직후 기록 동기화 모듈이 연결되지 않아, 전투·소비·획득 결과가 상태창에 반영되지 않던 현상을 수정했습니다.','접속 단말(SillyTavern)의 Relicta Session 모듈을 0.8.13으로 갱신한 뒤 다시 접속해 주십시오. 설치와 확인 방법은 「다이브 준비」에서 안내합니다.'],s:'개발팀'},
 {k:'event',t:'[3주년] 기적의 제단 특별 개방 — 빛기둥 연출 강화',d:'2076.04.03',b:['3주년을 기념해 모든 마을의 제단에 특별 빛기둥 연출이 적용됩니다. 신급 아이템 획득 시 서버 전체 방송과 함께 3주년 기념 칭호 「기적의 목격자」가 지급됩니다.','제단의 확률 정보는 운영 정책에 따라 공개하지 않습니다. 빛의 색은 등급과 무관합니다.'],s:'라이브운영팀'},
 {k:'notice',t:'붉은 낙인 정책 재안내 (엘리시안 주민 대상 PK)',d:'2076.03.28',b:['엘리시안 주민을 살해한 솜니움에게는 영구적인 붉은 낙인이 부여됩니다. 낙인 상태에서는 퀘스트를 받을 수 없으며, 모든 몬스터의 적대가 최대로 고정됩니다.','붉은 낙인을 해제하는 방법은 존재하지 않습니다. 낙인 해제를 미끼로 한 사기 거래에 주의해 주십시오.'],s:'라이브운영팀 GM 결'},
 {k:'notice',t:'나락 원정 시 강제 로그아웃 불가 현상 관련 안내',d:'2076.03.21',b:['나락 4층 「소리를 삼키는 잿빛 사막」에서 강제 로그아웃 후 아바타가 혼수 상태로 남는 현상, 7층 「깨어나지 않는 정원」에서 로그아웃 버튼이 보이지 않는 현상이 접수되고 있습니다.','해당 현상은 콘텐츠의 의도된 기믹이며, 자율 AI 코어의 판단에 따라 별도 조치는 진행되지 않습니다. 현실의 캡슐에서 의료 경보가 울릴 경우 즉시 솜누스 의료센터로 연락해 주십시오.'],s:'라이브운영팀'},
@@ -272,6 +273,26 @@ const lords=C.filter(c=>c.g==='abyss').sort((a,b)=>a.fl-b.fl), rets=C.filter(c=>
 const abyssList=[...lords];
 $('#floors').innerHTML=FL.map((f,i)=>{const L=lords[i],T=rets[i];return `<article class="floor" tabindex="0" role="button" data-i="${i}" aria-label="${i+1}층 ${esc(L.n)} 자세히"><div class="b">B${i+1}<small>${f[0]}</small></div><img class="lord" src="${head(L.id)}" alt="" loading="lazy" decoding="async"><div><h4>${esc(L.n)}</h4><div class="dom">${esc(f[1])}</div><p>${esc(f[2])}</p><div class="mob">출현: ${esc(f[3])}</div></div><div class="ret" data-r="${T.id}"><img src="${head(T.id)}" alt="" loading="lazy" decoding="async"><span><b>${esc(T.n)}</b>${esc(T.r.replace(/^\d층 /,''))}</span></div></article>`}).join('');
 $$('.floor').forEach(el=>{const go=e=>{const r=e.target.closest('.ret');if(r){openM(rets,rets.findIndex(c=>c.id===r.dataset.r))}else openM(lords,+el.dataset.i)};el.addEventListener('click',go);el.addEventListener('keydown',e=>{if(e.key==='Enter')openM(lords,+el.dataset.i)})});
+
+/* ── v1.3.0: 좁은 화면 메뉴 (펼침 목록) ── */
+(()=>{const g=$('.gnb'),b=$('.gnb .menu-btn'),nav=$('#gnav');if(!g||!b||!nav)return;const lbl=b.querySelector('.lbl');
+ const set=o=>{g.classList.toggle('open',o);b.setAttribute('aria-expanded',String(o));b.setAttribute('aria-label',o?'메뉴 닫기':'메뉴 열기');if(lbl)lbl.textContent=o?'닫기':'메뉴'};set(false);
+ b.addEventListener('click',e=>{e.stopPropagation();set(!g.classList.contains('open'))});
+ nav.addEventListener('click',e=>{if(e.target.closest('a'))set(false)});
+ document.addEventListener('click',e=>{if(g.classList.contains('open')&&!g.contains(e.target))set(false)});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&g.classList.contains('open')){set(false);b.focus()}});
+ const wide=matchMedia('(min-width:761px)');const onWide=e=>{if(e.matches)set(false)};wide.addEventListener?wide.addEventListener('change',onWide):wide.addListener(onWide)})();
+
+/* ── v1.3.0: 배포 버튼 (주소가 비어 있으면 숨김) ── */
+(()=>{$$('[data-dl]').forEach(a=>{const h=(a.getAttribute('href')||'').trim();if(!h||h==='#'){a.hidden=true;return}a.target='_blank';a.rel='noopener'});
+ const ext=$('[data-dl="ext"]'),code=$('[data-ext-url]');if(ext&&!ext.hidden&&code){code.textContent=ext.href;code.closest('.dv-ext-url').hidden=false}
+ const dl=$('.dv-dl');if(dl&&!$$('.dv-dl [data-dl]').some(a=>!a.hidden))dl.hidden=true})();
+
+/* ── v1.3.0: PV 전환 (3주년 PV · 퍼스트 티저) ── */
+(()=>{const v=$('.pv video'),tabs=$$('.pv-tabs button'),cap=$('#pvCap');if(!v||!tabs.length)return;
+ tabs.forEach(b=>b.addEventListener('click',()=>{if(b.getAttribute('aria-selected')==='true')return;
+  tabs.forEach(x=>x.setAttribute('aria-selected',String(x===b)));v.pause();const teaser=b.dataset.loop==='1';
+  v.src=b.dataset.src;v.poster=b.dataset.poster;v.loop=teaser;v.muted=teaser;v.preload='none';v.load();if(cap)cap.textContent=b.dataset.cap}))})();
 
 /* ── GNB 현재 위치 ── */
 const secs=$$('main section[id]');const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){$$('#gnav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))}})},{rootMargin:'-45% 0px -50% 0px'});secs.forEach(s=>io.observe(s));
