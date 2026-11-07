@@ -280,7 +280,7 @@ $$('.floor').forEach(el=>{const go=e=>{const r=e.target.closest('.ret');if(r){op
  nav.addEventListener('click',e=>{if(e.target.closest('a'))set(false)});
  document.addEventListener('click',e=>{if(g.classList.contains('open')&&!g.contains(e.target))set(false)});
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&g.classList.contains('open')){set(false);b.focus()}});
- const wide=matchMedia('(min-width:761px)');const onWide=e=>{if(e.matches)set(false)};wide.addEventListener?wide.addEventListener('change',onWide):wide.addListener(onWide)})();
+ const wide=matchMedia('(min-width:1101px)');const onWide=e=>{if(e.matches)set(false)};wide.addEventListener?wide.addEventListener('change',onWide):wide.addListener(onWide)})();
 
 /* ── v1.3.0: 배포 버튼 (주소가 비어 있으면 숨김) ── */
 (()=>{$$('[data-dl]').forEach(a=>{const h=(a.getAttribute('href')||'').trim();if(!h||h==='#'){a.hidden=true;return}a.target='_blank';a.rel='noopener'});
@@ -325,3 +325,33 @@ $('#dlgYes').addEventListener('click',async()=>{const attempt=++sealAttempt,btn=
 addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#dlg').classList.contains('open'))$('#dlgNo').click()});
 try{if(sessionStorage.getItem('relicta-unsealed'))ensureSealed().then(unseal).catch(()=>{})}catch(e){}
 })();
+
+/* ── v1.3.2: 테마 BGM 「Lobby of Oneiros」 ──
+   직접 누를 때만 재생(자동 재생 없음). Web Audio로 120초 지점에서 이음매 없이 반복하고, 켜고 끌 때 부드럽게 오르내린다.
+   탭을 떠나면 멈췄다가 돌아오면 이어서, PV를 재생하면 꺼진다. 음량만 기억한다. */
+(()=>{const box=document.getElementById('bgm');if(!box)return;const btn=box.querySelector('.bgm-btn'),vol=box.querySelector('.bgm-vol input');
+ const KEY='relicta-bgm-volume',LOOP=120;let ctx=null,gain=null,src=null,buf=null,el=null,on=false,ready=null,fadeT=0;
+ try{const v=Number(localStorage.getItem(KEY));if(localStorage.getItem(KEY)!==null&&v>=0&&v<=100)vol.value=v}catch(e){}
+ const level=()=>Math.pow(vol.value/100,1.6)*.9;
+ const ui=()=>{box.classList.toggle('is-on',on);btn.setAttribute('aria-pressed',String(on));btn.setAttribute('aria-label',on?'테마 음악 끄기':'테마 음악 켜기')};
+ const load=()=>ready||(ready=(async()=>{box.classList.add('is-loading');
+  try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw new Error('no webaudio');
+   ctx=new AC();gain=ctx.createGain();gain.gain.value=0;gain.connect(ctx.destination);ctx.resume&&ctx.resume();
+   const ab=await(await fetch(box.dataset.src)).arrayBuffer();
+   buf=await new Promise((ok,no)=>{const r=ctx.decodeAudioData(ab,ok,no);if(r&&r.then)r.then(ok,no)});
+   src=ctx.createBufferSource();src.buffer=buf;src.loop=true;src.loopStart=0;src.loopEnd=Math.min(buf.duration,LOOP);src.connect(gain);src.start(0);
+  }catch(e){ctx=null;el=new Audio(box.dataset.src);el.loop=true;el.preload='auto';el.volume=0}
+  box.classList.remove('is-loading')})());
+ const fade=(to,sec)=>{if(ctx&&gain){const t=ctx.currentTime;gain.gain.cancelScheduledValues(t);gain.gain.setValueAtTime(gain.gain.value,t);gain.gain.linearRampToValueAtTime(to,t+sec);return}
+  if(!el)return;clearInterval(fadeT);const from=el.volume,steps=Math.max(1,Math.round(sec*30));let k=0;
+  fadeT=setInterval(()=>{k++;el.volume=Math.max(0,Math.min(1,from+(to-from)*k/steps));if(k>=steps)clearInterval(fadeT)},1000/30)};
+ const start=async()=>{on=true;ui();if(ctx)ctx.resume();await load();if(!on)return;
+  if(ctx){await ctx.resume();fade(level(),1.8)}else{try{await el.play()}catch(e){on=false;ui();return}fade(level(),1.8)}};
+ const stop=(sec=.9)=>{on=false;ui();fade(0,sec);const c=ctx,e=el;setTimeout(()=>{if(on)return;if(c)c.suspend();else if(e)e.pause()},sec*1000+60)};
+ btn.addEventListener('click',()=>on?stop():start());
+ vol.addEventListener('input',()=>{try{localStorage.setItem(KEY,vol.value)}catch(e){}if(on)fade(level(),.15)});
+ let away=false;document.addEventListener('visibilitychange',()=>{if(!on&&!away)return;
+  if(document.hidden){if(on){away=true;if(ctx)ctx.suspend();else if(el)el.pause()}}
+  else if(away){away=false;if(ctx)ctx.resume();else if(el)el.play().catch(()=>{})}});
+ const v=document.querySelector('.pv video');if(v)v.addEventListener('play',()=>{if(on)stop(.6)});
+ ui()})();
