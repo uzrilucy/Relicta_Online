@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="풀다이브 VRMMORPG 《렐릭타 온라인》 공식 홈페이지 — 세계관, 지도, 가이드, 다이브 준비(SillyTavern 봇·확장 안내), 길드, 인물 도감, 랭킹, 나락.">
 <meta name="theme-color" content="#16122f">
-<meta name="application-version" content="1.3.0">
+<meta name="application-version" content="1.3.1">
 <link rel="icon" type="image/png" href="promo/emblem-b-dark.png">
 <link rel="apple-touch-icon" href="promo/emblem-b-dark.png">
 <meta property="og:type" content="website">
@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=1.3.0">
+<link rel="stylesheet" href="assets/css/style.css?v=1.3.1">
 </head>
 <body>
 <canvas id="stars" aria-hidden="true"></canvas>
@@ -227,7 +227,7 @@
         </ul>
       </div>
       <div class="dv-ver-r">
-        <p class="dv-req">봇 카드와 확장은 <b>함께</b> 설치해야 합니다. 확장만 새 버전이 나왔을 때는 확장만 업데이트하면 되고, 카드는 다시 가져오지 않아도 됩니다.</p>
+        <p class="dv-req">봇 카드와 확장은 <b>함께</b> 설치해야 합니다. 확장만 새 버전이 나오면 확장만 업데이트하면 되고, 카드는 다시 가져오지 않아도 됩니다.</p>
         <!-- 배포 주소: 아래 두 href에 주소를 넣으면 버튼이 나타납니다. 비워 두면 버튼은 숨겨집니다. -->
         <div class="dv-dl">
           <a class="btn gold" data-dl="card" href="">봇 카드 받기</a>
@@ -248,7 +248,7 @@
         <span class="dv-n">02</span>
         <h3>카드 가져오기</h3>
         <p>봇 카드 PNG를 가져올 때 묻는 창에서 <b>내장 로어북</b>과 <b>내장 정규식</b>을 모두 허용합니다.</p>
-        <p class="dv-tip">전역 정규식에 예전 렐릭타 정규식(<code>Relicta 0.8.6 ·</code> 등)이 있다면 지워 주세요. 새 디자인보다 먼저 적용됩니다.</p>
+        <p class="dv-tip">전역 정규식에 예전 렐릭타 정규식이 남아 있다면 지워 주세요. 새 디자인보다 먼저 적용됩니다.</p>
       </li>
       <li class="panel">
         <span class="dv-n">03</span>
@@ -348,34 +348,18 @@
       </figure>
     </div>
 
-    <div class="dv-two">
+    <div class="dv-help">
       <div>
         <div class="tier-h dv-h"><h3>함께 쓰기 · 문제 해결</h3></div>
         <div class="dv-faq">
-          <details><summary>「연결됨」인데 상태창이 바뀌지 않아요</summary><div><p>패널 제목 옆 확장 버전이 <b>v0.8.10 이상</b>인지 확인하고 페이지를 새로고침한 뒤 <b>새 채팅</b>에서 시험해 보세요. 그래도 같으면 패널의 「진단 정보」를 길게 눌러 복사해 제작자에게 보내 주세요. 모바일에서는 채팅창에 <code>/relicta 진단</code>을 입력해도 됩니다.</p></div></details>
+          <details><summary>「연결됨」인데 상태창이 바뀌지 않아요</summary><div><p>확장을 최신 버전으로 업데이트하고 페이지를 새로고침한 뒤 <b>새 채팅</b>에서 시험해 보세요. 그래도 같으면 패널의 「진단 정보」를 길게 눌러 복사해 제작자에게 보내 주세요. 모바일에서는 채팅창에 <code>/relicta 진단</code>을 입력해도 됩니다.</p></div></details>
           <details><summary>상태창 위에 「반영되지 않았습니다」가 떠요</summary><div><p>AI가 응답 끝의 숨은 기록을 빠뜨렸다는 뜻입니다. 재생성하면 다시 기록합니다. 자주 반복되면 실리태번의 <b>응답 길이(Max Response Length)</b>를 늘리고, <b>불완전한 문장 다듬기(Trim Incomplete Sentences)</b>를 꺼 주세요.</p></div></details>
-          <details><summary>이미지 자동 생성(오토픽) 확장과 같이 쓰고 싶어요</summary><div><p>함께 쓸 수 있습니다. 삽입 방식은 「인라인」과 「태그 교체」 모두 됩니다. 화면 순서는 <b>본문 → 이미지 → 상태창</b>입니다. 이미지 태그가 쓰다가 끊기면 응답 길이를 늘려 주세요. 판정 기록과 이미지 태그가 모두 응답 끝에 붙기 때문입니다.</p></div></details>
           <details><summary>재생성하면 가챠 결과가 바뀌나요?</summary><div><p>바뀌지 않습니다. 같은 입력은 같은 결과를 받고, 새 입력이 다음 결과를 받습니다. 빛기둥 색은 등급과 무관합니다.</p></div></details>
           <details><summary>다른 시작으로 바꾸고 싶어요</summary><div><p>첫 입력을 보내기 전이라면 첫 메시지를 넘겨서 바꾸면 됩니다. 이미 대화를 시작했다면 새 채팅을 열어 주세요.</p></div></details>
           <details><summary>그리팅 문구를 고쳤더니 시작 종류가 이상해요</summary><div><p>확장은 첫 메시지의 원문으로 시작 종류를 알아봅니다. 그리팅을 고쳤다면 카드의 <code>extensions.relicta.greeting_modes</code>에 있는 문구도 똑같이 고쳐 주세요.</p></div></details>
           <details><summary>패널에 「두 번 설치되어 있습니다」가 떠요</summary><div><p>같은 확장이 두 폴더에 설치된 상태입니다. 확장 관리에서 하나를 지우고 새로고침하세요.</p></div></details>
-          <details><summary>휴대폰이나 다른 기기에서 접속해도 되나요?</summary><div><p>됩니다. LAN 주소처럼 보안 연결이 아닌 주소로 접속해도 확장 v0.8.6부터 정상 동작합니다.</p></div></details>
+          <details><summary>휴대폰이나 다른 기기에서 접속해도 되나요?</summary><div><p>됩니다. LAN 주소처럼 보안 연결이 아닌 주소로 접속해도 정상 동작합니다.</p></div></details>
         </div>
-      </div>
-      <div>
-        <div class="tier-h dv-h"><h3>업데이트 기록</h3></div>
-        <ol class="dv-log">
-          <li><span class="v">확장 0.8.13</span><p>확장 패널 버튼의 글자가 한 글자씩 세로로 쌓이던 문제 수정</p></li>
-          <li><span class="v">확장 0.8.12</span><p>이미지 자동 생성(오토픽)과 함께 쓰기 · 이미지 태그를 판정 기록 뒤에 쓰도록 안내</p></li>
-          <li><span class="v">확장 0.8.11</span><p>다른 확장이 본문을 고치거나 덧붙여도 화면이 잘리지 않음 · 상태창을 본문 바깥에 배치</p></li>
-          <li class="is-key"><span class="v">확장 0.8.10</span><p><b>연결이 끊기던 근본 원인 수정</b> · 실리를 켠 직후 이벤트 연결이 건너뛰어지던 문제</p></li>
-          <li><span class="v">확장 0.8.9</span><p>본문이 바뀌어도 판정 기록 유지 · 패널 「진단 정보」와 <code>/relicta 진단</code></p></li>
-          <li><span class="v">확장 0.8.8</span><p>판정 대기 정보를 채팅 기록에도 보관 · 중복 설치 경고</p></li>
-          <li class="is-key"><span class="v">카드 0.8.7</span><p><b>그리팅 4종과 오프닝 카드</b> · 카드 세 장을 한 장으로 통합</p></li>
-          <li><span class="v">0.8.6</span><p>연결 오류 수정 · 켜기/끄기 즉시 저장 · 모바일·LAN 접속 지원</p></li>
-          <li><span class="v">0.8.5</span><p>상태창 Somnium Record와 확장 패널 새 디자인</p></li>
-          <li><span class="v">0.8.4</span><p>시스템 알림·제단·의뢰서·우편·꿈터 화면 Lucid 리디자인</p></li>
-        </ol>
       </div>
     </div>
   </div>
@@ -464,7 +448,7 @@
     <p>렐릭타 온라인은 자율 AI 코어가 운영합니다. 본 게임은 확률형 아이템을 포함하며, 확률 정보는 운영 정책에 따라 공개하지 않습니다.</p>
     <p>통각 제한 해제 모듈의 사용은 「가상공간 안전법」에 따라 처벌받습니다. 장시간 연속 다이브는 건강을 해칠 수 있습니다.</p>
     <p style="margin-top:10px;color:#6f6699">이 페이지는 시뮬레이션 봇 《렐릭타 온라인》의 설정집입니다. 등장하는 인물·단체·기업은 모두 가상입니다. <span class="redstar" tabindex="0">★<span class="tip">[SYSTEM: 너도 보고 있지?]</span></span></p>
-    <small class="site-version">홈페이지 v1.3.0 · 봇 카드 v0.8.7 · 확장 v0.8.13</small>
+    <small class="site-version">홈페이지 v1.3.1 · 봇 카드 v0.8.7 · 확장 v0.8.13</small>
   </div>
   <div class="rate" aria-label="이용 등급"><span>15</span><span class="p">확률형<br>아이템</span></div>
 </div></footer>
@@ -508,6 +492,6 @@
 <script defer src="assets/js/data.js?v=1.2.1"></script>
 <script defer src="assets/js/profiles.js?v=1.2.1"></script>
 <script defer src="assets/js/nai.js?v=1.2.1"></script>
-<script defer src="assets/js/app.js?v=1.3.0"></script>
+<script defer src="assets/js/app.js?v=1.3.1"></script>
 </body>
 </html>
