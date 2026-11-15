@@ -66,12 +66,40 @@ silvanus:{k:'아우렐리아 · 동',n:'실바누스 왕국',e:'Kingdom of Silva
 sanctus:{k:'아우렐리아 · 남',n:'상투스 왕국',e:'Kingdom of Sanctus',el:'sanctus',p:'절대신을 광신하는 신정 국가. 솜니움을 신이 보낸 천사이자 사도로 숭배합니다.',dl:[['솜니움을 부르는 말','천사, 사도']]},
 noctua:{k:'아우렐리아 · 지하',n:'녹투아 왕국',e:'Kingdom of Noctua',el:'noctua',p:'빈민가와 지하 암시장의 나라. 장물, 불법 정보, 밀수 꿈조각이 돌고, 낙인자들의 마지막 피난처가 됩니다.',dl:[['솜니움을 부르는 말','돈 많은 유령'],['산하·거주','낙인 (지하)']]},
 };
+const RIMG=new Set(['zero','abyss','krater','mementos','redsand','arcadia','silveria','cobalt','solarium','marcatus','arcanum','silvanus','sanctus','noctua']);
 function region(id){const r=R[id];$$('.hs').forEach(h=>h.classList.toggle('on',h.dataset.r===id));
  const g=r.g?D.groups.find(x=>x.id===r.g):null;
- $('#rinfo').innerHTML=`<span class="kind">${esc(r.k)}</span>${g?`<img class="em" src="${emb(g.em)}" alt="${esc(g.name)} 엠블럼" loading="lazy" decoding="async">`:''}<h3>${esc(r.n)}</h3><span class="eng">${esc(r.e)}</span><p>${esc(r.p)}</p>${r.dl?`<dl>${r.dl.map(([a,b])=>`<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('')}</dl>`:''}${r.sys?`<div class="sys">${r.sys}</div>`:''}${(r.g||r.el)?`<a class="btn ghost" style="align-self:flex-start;margin-top:6px" href="#people" data-jump="${r.g||r.el}">이 지역의 인물 보기</a>`:''}${id==='abyss'?`<a class="btn ghost" style="align-self:flex-start;margin-top:6px" href="#abyss">나락 층별 정보</a>`:''}`;
+ $('#rinfo').innerHTML=`${RIMG.has(id)?`<figure class="rshot"><img src="scenery/map/${id}.webp" width="960" height="540" alt="${esc(r.n)} 풍경" loading="lazy" decoding="async"></figure>`:''}<span class="kind">${esc(r.k)}</span>${g?`<img class="em" src="${emb(g.em)}" alt="${esc(g.name)} 엠블럼" loading="lazy" decoding="async">`:''}<h3>${esc(r.n)}</h3><span class="eng">${esc(r.e)}</span><p>${esc(r.p)}</p>${r.dl?`<dl>${r.dl.map(([a,b])=>`<dt>${esc(a)}</dt><dd>${esc(b)}</dd>`).join('')}</dl>`:''}${r.sys?`<div class="sys">${r.sys}</div>`:''}${(r.g||r.el)?`<a class="btn ghost" style="align-self:flex-start;margin-top:6px" href="#people" data-jump="${r.g||r.el}">이 지역의 인물 보기</a>`:''}${id==='abyss'?`<a class="btn ghost" style="align-self:flex-start;margin-top:6px" href="#abyss">나락 층별 정보</a>`:''}`;
  const j=$('#rinfo [data-jump]');if(j)j.addEventListener('click',()=>{setFilter(GN[j.dataset.jump].c==='plat'||GN[j.dataset.jump].c==='mid'?'player':(GN[j.dataset.jump].c==='elys'?'elys':'all'),j.dataset.jump)})}
 $$('.hs').forEach(h=>{h.addEventListener('click',()=>region(h.dataset.r));h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();region(h.dataset.r)}})});
 region('zero');
+
+/* ── 배경 풍경 로테이션: 가로 화면은 가로 10장, 세로 화면은 세로 10장 ── */
+const SCN={
+ l:[['l-elysion','엘리시온 전경','zero'],['l-arcadia','레노아 · 아르카디아 분지','arcadia'],['l-marcatus','아우렐리아 · 마르카투스 왕국','marcatus'],['l-mementos','레노아 · 메멘토스 유적','mementos'],['l-sanctus','아우렐리아 · 상투스 왕국','sanctus'],['l-redsand','레노아 · 레드샌드 협곡','redsand'],['l-arcanum','아우렐리아 · 아르카눔 왕국','arcanum'],['l-silvanus','아우렐리아 · 실바누스 왕국','silvanus'],['l-noctua','아우렐리아 · 녹투아 왕국','noctua'],['l-dive','네오 서울 · 24시 다이브 룸 「심해」','']],
+ p:[['p-altar','오네이로스의 제단',''],['p-silveria','레노아 · 실베리아 몽환림','silveria'],['p-cobalt','레노아 · 코발트 군도','cobalt'],['p-solarium','아우렐리아 · 솔라리움 제국','solarium'],['p-krater','레노아 · 크라테르 설원','krater'],['p-sky','하늘 영토',''],['p-abyss','나락','abyss'],['p-babel','네오 서울 · 바벨 타워',''],['p-zero','제0구역 · 시스템의 틈','zero'],['p-castle','남겨진 꿈의 성','']]};
+(()=>{const box=$('#scenery'),cap=$('#sceneCap');if(!box)return;
+ const L=[...box.children],nm=cap&&cap.querySelector('.sc-n'),pb=cap&&cap.querySelector('[data-sc="pause"]');
+ const tall=matchMedia('(max-aspect-ratio: 4/5)'),calm=matchMedia('(prefers-reduced-motion: reduce)'),KEY='relicta.scenery.paused';
+ let i=-1,front=0,timer=0,hideT=0,turn=0,paused=false;try{paused=localStorage.getItem(KEY)==='1'}catch(e){}
+ const list=()=>SCN[tall.matches?'p':'l'],url=k=>`scenery/${k}.webp`,cache={};
+ const load=k=>cache[k]||(cache[k]=new Promise(r=>{const im=new Image();im.decoding='async';im.onload=()=>r(true);im.onerror=()=>{delete cache[k];r(false)};im.src=url(k)}));
+ const ui=()=>{if(!pb)return;pb.setAttribute('aria-pressed',paused);pb.setAttribute('aria-label',paused?'풍경 넘김 다시 시작':'풍경 넘김 멈추기');cap.classList.toggle('is-paused',paused)};
+ async function show(n){const set=list(),my=++turn,k=(n%set.length+set.length)%set.length,[file,label,rid]=set[k];
+  if(!(await load(file))||my!==turn)return;i=k;
+  const old=L[front],nx=L[1-front];clearTimeout(hideT);
+  nx.style.backgroundImage=`url("${url(file)}")`;nx.style.zIndex=2;old.style.zIndex=1;
+  nx.classList.remove('on');void nx.offsetWidth;nx.classList.add('on');front=1-front;
+  hideT=setTimeout(()=>old.classList.remove('on'),2600);
+  if(nm){nm.textContent=label;if(rid){nm.href='#map';nm.dataset.r=rid;nm.removeAttribute('aria-disabled')}else{nm.removeAttribute('href');delete nm.dataset.r;nm.setAttribute('aria-disabled','true')}}
+  load(set[(k+1)%set.length][0]);plan()}
+ function plan(){clearTimeout(timer);if(paused||document.hidden)return;timer=setTimeout(()=>show(i+1),calm.matches?24000:16000)}
+ if(cap){cap.addEventListener('click',e=>{const b=e.target.closest('[data-sc]');
+   if(b){const a=b.dataset.sc;if(a==='pause'){paused=!paused;try{localStorage.setItem(KEY,paused?'1':'0')}catch(err){}ui();plan()}else show(i+(a==='next'?1:-1));return}
+   if(e.target.closest('.sc-n')&&nm.dataset.r)region(nm.dataset.r)})}
+ tall.addEventListener('change',()=>show(0));
+ document.addEventListener('visibilitychange',plan);
+ ui();show(0)})();
 
 /* ── 길드 ── */
 const GUILD={
