@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="풀다이브 VRMMORPG 《렐릭타 온라인》 공식 홈페이지 — 세계관, 지도, 가이드, 다이브 준비(SillyTavern 봇·확장 안내), 길드, 인물 도감, 랭킹, 나락.">
 <meta name="theme-color" content="#16122f">
-<meta name="application-version" content="1.3.1">
+<meta name="application-version" content="1.4.0">
 <link rel="icon" type="image/png" href="promo/emblem-b-dark.png">
 <link rel="apple-touch-icon" href="promo/emblem-b-dark.png">
 <meta property="og:type" content="website">
@@ -17,9 +17,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=1.3.2">
+<link rel="stylesheet" href="assets/css/style.css?v=1.4.0">
 </head>
 <body>
+<div class="scenery" id="scenery" aria-hidden="true"><i class="sc-l"></i><i class="sc-l"></i></div>
 <canvas id="stars" aria-hidden="true"></canvas>
 
 <div class="corp"><div class="wrap"><b>ONEIROS NETWORK</b><nav aria-label="운영사 메뉴"><a href="#news">고객센터</a><a href="#dive">이용 안내</a><a href="#footer">운영 정책</a></nav></div></div>
@@ -47,6 +48,15 @@
         <div><small class="live">동시 접속</small><strong id="ccu">1,512,804,117</strong></div>
         <div><small>서비스 일수</small><strong>D+1,096</strong></div>
         <div><small>오늘의 신급 획득</small><strong>0명</strong></div>
+      </div>
+      <div class="scene-cap" id="sceneCap">
+        <span class="sc-k">지금 보이는 풍경</span>
+        <a class="sc-n" href="#map">엘리시온</a>
+        <span class="sc-ctl">
+          <button type="button" data-sc="prev" aria-label="이전 풍경"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+          <button type="button" data-sc="pause" aria-pressed="false" aria-label="풍경 넘김 멈추기"><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg></button>
+          <button type="button" data-sc="next" aria-label="다음 풍경"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+        </span>
       </div>
     </div>
     <div class="cover">
@@ -312,7 +322,7 @@
         </article>
         <article class="dv-feat">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20h18"/><path d="M6 20v-5M10 20V9M14 20v-7M18 20V5"/></svg>
-          <h4>행운 보정 6단계</h4><p>운 좋은 설정의 캐릭터라면 패널, 빠른 답장 <b>행운</b> 버튼, <code>/relicta 행운 1~6</code> 중 편한 곳에서 고릅니다. 플레이어 본인의 소환·룰렛에만 적용됩니다.</p>
+          <h4>행운 보정 7단계</h4><p>운 좋은 설정의 캐릭터라면 패널, 빠른 답장 <b>행운</b> 버튼, <code>/relicta 행운 1~7</code> 중 편한 곳에서 고릅니다. 최고 단계 <b>7 · 신애</b>는 신의 사랑을 받는 운으로, 꽝이 나오지 않습니다. 플레이어 본인의 소환·룰렛에만 적용됩니다.</p>
         </article>
         <article class="dv-feat">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.8-3.2 3-5 5.5-5s4.7 1.8 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.6 14.3c2.4.1 4.2 1.7 4.9 4.7"/></svg>
@@ -358,7 +368,7 @@
           <div class="qr-bar"><span class="qr-b is-b"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h11v8H8l-4 3z"/><path d="M9 16v1h7l4 3V9h-4"/></svg>꿈터</span><span class="qr-b is-m"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="m4.5 7.5 7.5 5.5 7.5-5.5"/></svg>쪽지함</span><span class="qr-b is-g"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v18"/><path d="M6 4h12l-2.6 4L18 12H6"/></svg>길드 채팅</span><span class="qr-b is-a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 10 12 21 5 10Z"/><path d="M5 10h14M12 3l-2.6 7L12 21l2.6-11Z"/></svg>제단 1회</span><span class="qr-b is-a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8Z"/></svg>제단 10회</span><span class="qr-b is-r"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h4.5v16H14"/><path d="M10 8l-4 4 4 4M6 12h9"/></svg>로그아웃·접속</span><span class="qr-b is-l"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3.2"/><circle cx="15" cy="9" r="3.2"/><circle cx="9" cy="15" r="3.2"/><circle cx="15" cy="15" r="3.2"/><path d="M12 12l5 8"/></svg>행운</span></div>
           <div class="qr-in"><span>메시지를 입력하세요</span><i aria-hidden="true"></i></div>
         </div>
-        <ul class="qr-list"><li class="is-b"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h11v8H8l-4 3z"/><path d="M9 16v1h7l4 3V9h-4"/></svg><b>꿈터</b><span>익명 게시판 피드를 이번 응답에서만 엽니다. 꿈터 자동 표시를 꺼 둔 채로도 됩니다.</span></li><li class="is-m"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="m4.5 7.5 7.5 5.5 7.5-5.5"/></svg><b>쪽지함</b><span>받은 쪽지 목록이 열립니다. 한 줄을 누르면 편지가 펼쳐집니다.</span></li><li class="is-g"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v18"/><path d="M6 4h12l-2.6 4L18 12H6"/></svg><b>길드 채팅</b><span>길드원들의 실시간 채널. 길드가 없다면 레노아 광장 채널이 열립니다.</span></li><li class="is-a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 10 12 21 5 10Z"/><path d="M5 10h14M12 3l-2.6 7L12 21l2.6-11Z"/></svg><b>제단 1회</b><span>30다이아 소환. 확장이 미리 정한 숨은 제단 순서를 그대로 따릅니다.</span></li><li class="is-a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8Z"/></svg><b>제단 10회</b><span>300다이아 10연. 다이아가 모자라면 가능한 만큼만 뽑습니다.</span></li><li class="is-r"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h4.5v16H14"/><path d="M10 8l-4 4 4 4M6 12h9"/></svg><b>로그아웃·접속</b><span>게임 중이면 로그아웃, 현실이면 다시 접속합니다. 버튼 하나로 오갑니다.</span></li><li class="is-l"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3.2"/><circle cx="15" cy="9" r="3.2"/><circle cx="9" cy="15" r="3.2"/><circle cx="15" cy="15" r="3.2"/><path d="M12 12l5 8"/></svg><b>행운</b><span>1~6단계를 고르는 창이 뜹니다. 메시지는 보내지 않고 설정만 바꿉니다.</span></li></ul>
+        <ul class="qr-list"><li class="is-b"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h11v8H8l-4 3z"/><path d="M9 16v1h7l4 3V9h-4"/></svg><b>꿈터</b><span>익명 게시판 피드를 이번 응답에서만 엽니다. 꿈터 자동 표시를 꺼 둔 채로도 됩니다.</span></li><li class="is-m"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="m4.5 7.5 7.5 5.5 7.5-5.5"/></svg><b>쪽지함</b><span>받은 쪽지 목록이 열립니다. 한 줄을 누르면 편지가 펼쳐집니다.</span></li><li class="is-g"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v18"/><path d="M6 4h12l-2.6 4L18 12H6"/></svg><b>길드 채팅</b><span>길드원들의 실시간 채널. 길드가 없다면 레노아 광장 채널이 열립니다.</span></li><li class="is-a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 10 12 21 5 10Z"/><path d="M5 10h14M12 3l-2.6 7L12 21l2.6-11Z"/></svg><b>제단 1회</b><span>30다이아 소환. 확장이 미리 정한 숨은 제단 순서를 그대로 따릅니다.</span></li><li class="is-a"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3.5 2.6 5.4 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.8Z"/></svg><b>제단 10회</b><span>300다이아 10연. 다이아가 모자라면 가능한 만큼만 뽑습니다.</span></li><li class="is-r"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h4.5v16H14"/><path d="M10 8l-4 4 4 4M6 12h9"/></svg><b>로그아웃·접속</b><span>게임 중이면 로그아웃, 현실이면 다시 접속합니다. 버튼 하나로 오갑니다.</span></li><li class="is-l"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3.2"/><circle cx="15" cy="9" r="3.2"/><circle cx="9" cy="15" r="3.2"/><circle cx="15" cy="15" r="3.2"/><path d="M12 12l5 8"/></svg><b>행운</b><span>1~7단계를 고르는 창이 뜹니다. 메시지는 보내지 않고 설정만 바꿉니다.</span></li></ul>
         <ol class="qr-how">
           <li>실리태번 <b>확장 → 빠른 답장</b>에서 <b>세트 가져오기</b>로 QR 파일을 불러옵니다.</li>
           <li>불러온 「렐릭타 단말」 세트를 <b>전역</b> 또는 <b>캐릭터 세트</b>에 추가합니다.</li>
@@ -387,8 +397,16 @@
           <details><summary>패널에 「두 번 설치되어 있습니다」가 떠요</summary><div><p>같은 확장이 두 폴더에 설치된 상태입니다. 확장 관리에서 하나를 지우고 새로고침하세요.</p></div></details>
           <details><summary>QR 버튼을 눌렀더니 길드 채팅·쪽지함이 글자로 보여요</summary><div><p>봇 카드 v1.0의 <b>내장 정규식</b>이 꺼져 있거나, 단말 기능이 없던 예전 카드를 쓰는 중입니다. 카드를 v1.0으로 다시 가져오고 내장 정규식을 허용해 주세요.</p></div></details>
           <details><summary>행운·로그아웃 버튼에서 「알 수 없는 명령」이 떠요</summary><div><p>두 버튼은 Relicta Session 확장의 <code>/relicta</code> 명령을 씁니다. 확장이 설치되어 켜져 있는지, 패널에 「● 연결됨」이 보이는지 확인하세요.</p></div></details>
+          <details><summary>행운 버튼에 7단계 「신애」가 안 보여요</summary><div><p>11월 15일 이전에 받은 빠른 답장 세트입니다. 새 세트를 다시 가져오거나, 확장 패널의 「행운 보정」 또는 <code>/relicta 행운 7</code>로 고르면 됩니다. 확장은 최신 버전이어야 합니다.</p></div></details>
           <details><summary>휴대폰이나 다른 기기에서 접속해도 되나요?</summary><div><p>됩니다. LAN 주소처럼 보안 연결이 아닌 주소로 접속해도 정상 동작합니다.</p></div></details>
         </div>
+      </div>
+      <div class="dv-logbox">
+        <div class="tier-h dv-h"><h3>업데이트 기록</h3><span>정식 배포 이후</span></div>
+        <ol class="dv-log">
+          <li class="is-key"><span class="v">2026.11.15 · 확장</span><p><b>행운 보정 7단계 「신애」 추가</b> · 신급 3% · 상등급 77% · 노말 20% · 꽝 없음. 확장만 업데이트하면 되고 봇 카드는 그대로입니다.</p></li>
+          <li><span class="v">2026.11.08 · 정식 배포</span><p>봇 카드 · 확장 Relicta Session · 빠른 답장 렐릭타 단말 v1.0</p></li>
+        </ol>
       </div>
     </div>
   </div>
@@ -477,7 +495,7 @@
     <p>렐릭타 온라인은 자율 AI 코어가 운영합니다. 본 게임은 확률형 아이템을 포함하며, 확률 정보는 운영 정책에 따라 공개하지 않습니다.</p>
     <p>통각 제한 해제 모듈의 사용은 「가상공간 안전법」에 따라 처벌받습니다. 장시간 연속 다이브는 건강을 해칠 수 있습니다.</p>
     <p style="margin-top:10px;color:#6f6699">이 페이지는 시뮬레이션 봇 《렐릭타 온라인》의 설정집입니다. 등장하는 인물·단체·기업은 모두 가상입니다. <span class="redstar" tabindex="0">★<span class="tip">[SYSTEM: 너도 보고 있지?]</span></span></p>
-    <small class="site-version">홈페이지 v1.3.2 · 봇 카드 v1.0 · 확장 v1.0 · 빠른 답장 v1.0 · 테마 BGM 「Lobby of Oneiros」</small>
+    <small class="site-version">홈페이지 v1.4.0 · 봇 카드 v1.0 · 확장 v1.0 · 빠른 답장 v1.0 · 테마 BGM 「Lobby of Oneiros」</small>
   </div>
   <div class="rate" aria-label="이용 등급"><span>15</span><span class="p">확률형<br>아이템</span></div>
 </div></footer>
@@ -528,6 +546,6 @@
 <script defer src="assets/js/data.js?v=1.2.1"></script>
 <script defer src="assets/js/profiles.js?v=1.2.1"></script>
 <script defer src="assets/js/nai.js?v=1.2.1"></script>
-<script defer src="assets/js/app.js?v=1.3.2"></script>
+<script defer src="assets/js/app.js?v=1.4.0"></script>
 </body>
 </html>
